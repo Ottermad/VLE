@@ -1,9 +1,9 @@
 import datetime
 
-from flask import Flask, jsonify, current_app
+from flask import Flask, jsonify, current_app, g
 
 from flask_bcrypt import check_password_hash
-from flask_jwt import JWT
+from flask_jwt import JWT, current_identity
 from flask_sqlalchemy import SQLAlchemy
 
 from .exceptions import CustomError
@@ -35,6 +35,7 @@ def identity(payload):
     user = User.query.get(user_id)
     if user is None:
         raise CustomError(404, 'User with id: {} was not found.'.format(id))
+    g.user = user
     return user.to_dict()
 
 
@@ -64,6 +65,9 @@ def create_app():
 
     from .school import school_blueprint
     app.register_blueprint(school_blueprint)
+    from .permissions import permissions_blueprint
+    app.register_blueprint(permissions_blueprint)
     from .user import user_blueprint
     app.register_blueprint(user_blueprint)
+
     return app

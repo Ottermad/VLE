@@ -1,6 +1,7 @@
 from app import db
 
 from flask_bcrypt import generate_password_hash
+from app.permissions.models import user_roles, user_permissions
 
 
 class User(db.Model):
@@ -17,6 +18,14 @@ class User(db.Model):
     last_name = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.LargeBinary())
+    permissions = db.relationship(
+        'Permission', secondary=user_permissions,
+        backref=db.backref('user_permissions', lazy='dynamic')
+    )
+    roles = db.relationship(
+        'Role', secondary=user_roles,
+        backref=db.backref('user_roles', lazy='dynamic')
+    )
 
     def __init__(self, username, first_name, last_name, email, password, school_id):
         """Create a User object but not save it to the database."""
@@ -36,5 +45,6 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
-            'username': self.username
+            'username': self.username,
+            'school_id': self.school_id
         }

@@ -24,6 +24,7 @@ def create():
         raise FieldInUseError("name")
 
     school = School(school_name=data['name'])
+
     db.session.add(school)
     db.session.commit()
 
