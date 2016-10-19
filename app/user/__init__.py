@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt import jwt_required
 
 from app.exceptions import FieldInUseError, CustomError
 from app.helper import json_from_request, check_keys
+from app.permissions.decorators import permissions_required
 from app.school.models import School
 
 from .models import db, User
@@ -14,8 +16,9 @@ def index():
     return "User Index"
 
 
-# TODO: Add role based and logged in authentication
 @user_blueprint.route("/user", methods=["POST"])
+@jwt_required()
+@permissions_required({'CRUD_USERS'})
 def create_user():
     """Route to create User from a POST request."""
 
