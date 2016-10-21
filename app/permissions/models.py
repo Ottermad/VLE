@@ -31,7 +31,8 @@ class Permission(db.Model):
     name = db.Column(db.String(120))
 
     DEFAULT_NAMES = {
-        "CRUD_USERS"
+        "CRUD_USERS",
+        "CRUD_PERMISSIONS"
     }
 
     def __init__(self, name, school_id):
@@ -62,7 +63,7 @@ class Role(db.Model):
     )
 
     DEFAULT_ROLES = {
-        'ADMINISTRATOR': ['CRUD_USERS']
+        'ADMINISTRATOR': ['CRUD_USERS', 'CRUD_PERMISSIONS']
     }
 
     def __init__(self, name, school_id):

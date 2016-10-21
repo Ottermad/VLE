@@ -24,3 +24,9 @@ class FieldInUseError(CustomError):
     """Error for when a vale property on a model is already in use."""
     def __init__(self, property, **kwargs):
         super().__init__(409, message="{} already in use.".format(property))
+
+
+class UnauthorizedError(CustomError):
+    """Return a generic 401 Unauthorized error."""
+    def __init__(self):
+        super().__init__(401, message="Unauthorized.")

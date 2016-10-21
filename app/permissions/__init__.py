@@ -1,16 +1,20 @@
-from flask import Blueprint, jsonify, g
-from flask_jwt import jwt_required, current_identity
+from flask import Blueprint, jsonify, g, request
+from flask_jwt import jwt_required
 
-from app.exceptions import CustomError
+from app.exceptions import CustomError, UnauthorizedError
+from app.helper import check_keys, json_from_request
 
 from .models import Permission, Role, role_permissions, db
+from .decorators import permissions_required
+
+from app.user.models import User
 
 permissions_blueprint = Blueprint('permissions', __name__, url_prefix='/permissions')
 
 
-@permissions_blueprint.route('/set-defaults/<int:school_id>', methods=["POST"])
+@permissions_blueprint.route('/set-defaults/', methods=["POST"])
 @jwt_required()
-def default(school_id):
+def default():
     """
     Create default roles and permissions for school.
 
@@ -18,8 +22,9 @@ def default(school_id):
     Only works if permissions do not exist yet.
     """
 
+    school_id = g.user.school_id
+
     # Check permissions not created yet.
-    school_id = current_identity['school_id']
     if Permission.query.filter_by(school_id=school_id).first() is not None:
         raise CustomError(401, message='Permissions already setup.')
 
@@ -40,4 +45,42 @@ def default(school_id):
     db.session.commit()
 
     # Return success status
-    return jsonify({'success': True})
+    return jsonify({'success': True}), 201
+
+
+@permissions_blueprint.route('/permission/grant', methods=["POST"])
+@jwt_required()
+@permissions_required({'CRUD_PERMISSIONS'})
+def grant_permission():
+    """Grant a permission to a user."""
+    data = json_from_request(request)
+
+    expected_keys = ["user_id", "permission_id"]
+    check_keys(expected_keys, data)
+
+    # Check user specified is in the correct school
+    user = User.query.filter_by(id=data['user_id']).first()
+    if user is None:
+        raise CustomError(409, message="Invalid user_id.")
+    if user.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    # Check the permission specified is in the correct school
+    permission = Permission.query.filter_by(id=data['permission_id']).first()
+    if permission is None:
+        raise CustomError(409, message="Invalid permission_id.")
+    if permission.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    # Check user does not have the permission
+    for p in user.permissions:
+        if p.id == data['permission_id']:
+            raise CustomError(409, message="User with id: {} already has permission with id: {}".format(
+                data['user_id'], data['permission_id']))
+
+    user.permissions.append(permission)
+    db.session.add(user)
+    db.session.commit()
+
+    # Return success status
+    return jsonify({'success': True}), 201

@@ -47,7 +47,7 @@ def create_database():
 def run():
     call(["python", "manage.py", "create_database"])
     call(["python", "manage.py", "db", "upgrade"])
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=8000, debug=True)
 
 if __name__ == "__main__":
     manager.run()
