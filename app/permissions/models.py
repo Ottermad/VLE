@@ -29,28 +29,37 @@ class Permission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     name = db.Column(db.String(120))
+    description = db.Column(db.String(240))
 
-    DEFAULT_NAMES = {
-        "CRUD_USERS",
-        "CRUD_PERMISSIONS"
-    }
+    DEFAULTS = [
+        {
+            "name": "CRUD_USERS",
+            "description": "Allows a user to create, read, update and delete users."
+        },
+        {
+            "name": "CRUD_PERMISSIONS",
+            "description": "Allows a user to create, read, update and delete permissions."
+        }
+    ]
 
-    def __init__(self, name, school_id):
+    def __init__(self, name, school_id, description):
         self.name = name
         self.school_id = school_id
+        self.description = description
 
     def to_dict(self):
         return {
             'id': self.id,
             'school_id': self.school_id,
-            'name': self.name
+            'name': self.name,
+            'description': self.description
         }
 
     @classmethod
     def default_permissions(cls, school_id):
         permissions = []
-        for name in cls.DEFAULT_NAMES:
-            permissions.append(cls(name, school_id))
+        for permission in cls.DEFAULTS:
+            permissions.append(cls(school_id=school_id, **permission))
         return permissions
 
 
