@@ -39,6 +39,13 @@ class Permission(db.Model):
         self.name = name
         self.school_id = school_id
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'school_id': self.school_id,
+            'name': self.name
+        }
+
     @classmethod
     def default_permissions(cls, school_id):
         permissions = []

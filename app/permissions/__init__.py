@@ -48,6 +48,17 @@ def default():
     return jsonify({'success': True}), 201
 
 
+@permissions_blueprint.route('/permission')
+@jwt_required()
+@permissions_required({'CRUD_PERMISSIONS'})
+def permission_listing():
+    """Return a list of all permissions for a school."""
+    permissions = Permission.query.filter_by(school_id=g.user.school_id)
+    return jsonify({
+        'permissions': [p.to_dict() for p in permissions]
+    }), 200
+
+
 @permissions_blueprint.route('/permission/grant', methods=["POST"])
 @jwt_required()
 @permissions_required({'CRUD_PERMISSIONS'})
