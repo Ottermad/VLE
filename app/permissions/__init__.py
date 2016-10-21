@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, g, request
 from flask_jwt import jwt_required
 
-from app.exceptions import CustomError, UnauthorizedError
+from app.exceptions import CustomError, UnauthorizedError, FieldInUseError
 from app.helper import check_keys, json_from_request
 
 from .models import Permission, Role, role_permissions, db
@@ -48,15 +48,31 @@ def default():
     return jsonify({'success': True}), 201
 
 
-@permissions_blueprint.route('/permission')
+@permissions_blueprint.route('/permission', methods=["POST", "GET"])
 @jwt_required()
 @permissions_required({'CRUD_PERMISSIONS'})
 def permission_listing():
-    """Return a list of all permissions for a school."""
-    permissions = Permission.query.filter_by(school_id=g.user.school_id)
-    return jsonify({
-        'permissions': [p.to_dict() for p in permissions]
-    }), 200
+    """Return a list of all permissions for a school or create a new one."""
+    if request.method == "POST":
+        data = json_from_request(request)
+        expected_keys = ["name", "description"]
+        check_keys(expected_keys, data)
+
+        # Check name not in use by school
+        if Permission.query.filter_by(name=data['name'], school_id=g.user.school_id).first() is not None:
+            raise FieldInUseError("name")
+
+        permission = Permission(name=data['name'], description=data['description'], school_id=g.user.school_id)
+        db.session.add(permission)
+        db.session.commit()
+
+        return jsonify({'success': True, 'permission': permission.to_dict()}), 201
+
+    else:
+        permissions = Permission.query.filter_by(school_id=g.user.school_id)
+        return jsonify({
+            'permissions': [p.to_dict() for p in permissions]
+        }), 200
 
 
 @permissions_blueprint.route('/permission/grant', methods=["POST"])
