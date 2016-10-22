@@ -30,3 +30,9 @@ class UnauthorizedError(CustomError):
     """Return a generic 401 Unauthorized error."""
     def __init__(self):
         super().__init__(401, message="Unauthorized.")
+
+
+class NotFoundError(CustomError):
+    """Return a generic 404 error."""
+    def __init__(self):
+        super().__init__(404, message="Not found.")
