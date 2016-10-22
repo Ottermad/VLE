@@ -12,7 +12,7 @@ from app.user.models import User
 permissions_blueprint = Blueprint('permissions', __name__, url_prefix='/permissions')
 
 
-@permissions_blueprint.route('/set-defaults/', methods=["POST"])
+@permissions_blueprint.route('/set-defaults', methods=["POST"])
 @jwt_required()
 def default():
     """
