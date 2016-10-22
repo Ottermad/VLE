@@ -189,3 +189,48 @@ def role_listing():
             'success': True,
             'roles': [r.to_dict(nest_permissions=True) for r in roles]
         })
+
+
+@permissions_blueprint.route('/role/<int:role_id>', methods=["GET", "PUT", "DELETE"])
+@jwt_required()
+@permissions_required({'CRUD_PERMISSIONS'})
+def role_detail(role_id):
+    # Check role exists
+    role = Role.query.filter_by(id=role_id).first()
+
+    if role is None:
+        raise NotFoundError()
+
+    #  Check permission in correct school
+    if role.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    # Check request method
+    if request.method == "GET":
+        return jsonify({'success': True, 'role': role.to_dict()})
+    if request.method == "DELETE":
+        db.session.delete(role)
+        message = "Deleted."
+    if request.method == "PUT":
+        data = json_from_request(request)
+        if "name" in data.keys():
+            role.name = data['name']
+        if "permissions" in data.keys():
+            # Check all permissions are valid
+            permissions = Permission.query.filter(
+                Permission.id.in_(data['permissions']),
+                Permission.school_id == g.user.school_id
+            )
+
+            if permissions.count() != len(data['permissions']):
+                raise CustomError(409, message="Invalid Permission.")
+
+            role.permissions = [p for p in permissions]
+            db.session.add(role)
+
+        message = "Updated."
+
+    db.session.commit()
+
+    # Return
+    return jsonify({'success': True, "message": message})
