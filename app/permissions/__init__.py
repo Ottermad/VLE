@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, g, request
 from flask_jwt import jwt_required
 
-from app.exceptions import CustomError, UnauthorizedError, FieldInUseError
+from app.exceptions import CustomError, UnauthorizedError, FieldInUseError, NotFoundError
 from app.helper import check_keys, json_from_request
 
 from .models import Permission, Role, role_permissions, db
@@ -73,6 +73,40 @@ def permission_listing():
         return jsonify({
             'permissions': [p.to_dict() for p in permissions]
         }), 200
+
+
+@permissions_blueprint.route('/permission/<int:permission_id>', methods=["GET", "PUT", "DELETE"])
+@jwt_required()
+@permissions_required({'CRUD_PERMISSIONS'})
+def permission_detail(permission_id):
+    # Check permission exists
+    permission = Permission.query.filter_by(id=permission_id).first()
+
+    if permission is None:
+        raise NotFoundError()
+
+    # Check permission in correct school
+    if permission.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    # Check request method
+    if request.method == "GET":
+        return jsonify({'success': True, 'permission': permission.to_dict()})
+    if request.method == "DELETE":
+        db.session.delete(permission)
+        message = "Deleted."
+    if request.method == "PUT":
+        data = json_from_request(request)
+        if "name" in data.keys():
+            permission.name = data['name']
+        if "description" in data.keys():
+            permission.description = data['description']
+        message = "Updated."
+
+    db.session.commit()
+
+    # Return
+    return jsonify({'success': True, "message": message})
 
 
 @permissions_blueprint.route('/permission/grant', methods=["POST"])
