@@ -145,3 +145,47 @@ def grant_permission():
 
     # Return success status
     return jsonify({'success': True}), 201
+
+
+@permissions_blueprint.route('/role', methods=["POST", "GET"])
+@jwt_required()
+@permissions_required({'CRUD_PERMISSIONS'})
+def role_listing():
+    """Return a list of all roles for a school or create a new one."""
+    if request.method == "POST":
+        # Create a new role
+        data = json_from_request(request)
+
+        expected_keys = ["name", "permissions"]
+        check_keys(expected_keys, data)
+
+        # Check name not in use
+        if Role.query.filter_by(name=data['name'], school_id=g.user.school_id).first() is not None:
+            raise FieldInUseError("name")
+
+        # Check all permissions are valid
+        permissions = Permission.query.filter(
+            Permission.id.in_(data['permissions']),
+            Permission.school_id == g.user.school_id
+        )
+
+        if permissions.count() != len(data['permissions']):
+            raise CustomError(409, message="Invalid Permission.")
+
+        role = Role(name=data['name'], school_id=g.user.school_id)
+        [role.permissions.append(p) for p in permissions]
+        db.session.add(role)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'role': role.to_dict()
+        }), 201
+
+    else:
+        # Return a listing of all roles
+        roles = Role.query.filter_by(school_id=g.user.school_id)
+        return jsonify({
+            'success': True,
+            'roles': [r.to_dict(nest_permissions=True) for r in roles]
+        })

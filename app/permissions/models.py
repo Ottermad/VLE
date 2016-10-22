@@ -93,6 +93,16 @@ class Role(db.Model):
             raise Exception
         self.permissions.append(permission)
 
+    def to_dict(self, nest_permissions=False):
+        dictionary = {
+            'id': self.id,
+            'school_id': self.school_id,
+            'name': self.name,
+        }
+        if nest_permissions:
+            dictionary['permissions'] = [p.to_dict() for p in self.permissions]
+        return dictionary
+
     @classmethod
     def default_roles(cls, school_id):
         roles =[]
