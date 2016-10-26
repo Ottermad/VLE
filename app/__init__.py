@@ -1,16 +1,26 @@
 import datetime
+import logging
 
 from flask import Flask, jsonify, current_app, g
 
 from flask_bcrypt import check_password_hash
-from flask_jwt import JWT, current_identity
+from flask_jwt import JWT
+from flask_migrate import init, upgrade, Migrate
 from flask_sqlalchemy import SQLAlchemy
+
+from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError
+
+from config import config
 
 from .exceptions import CustomError
 from .settings import DATABASE_NAME, SECRET_KEY
 
 db = SQLAlchemy()
 jwt = JWT()
+migrate = Migrate()
+
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] - %(message)s')
 
 
 @jwt.authentication_handler
@@ -48,13 +58,12 @@ def payload_handler(identity):
     return {'exp': exp, 'iat': iat, 'nbf': nbf, 'identity': new_identity}
 
 
-def create_app():
+def create_app(config_name="default"):
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@' \
-        'localhost/{}'.format(DATABASE_NAME)
-    app.config['SECRET_KEY'] = SECRET_KEY
+    app.config.from_object(config[config_name])
 
     db.init_app(app)
+
     jwt.init_app(app)
 
     @app.errorhandler(CustomError)
@@ -73,3 +82,20 @@ def create_app():
     app.register_blueprint(lessons_blueprint)
 
     return app
+
+
+def create_database():
+    logging.info("Creating database")
+    engine = create_engine("postgresql://postgres:postgres@localhost/postgres")
+    conn = engine.connect()
+    conn.execute("commit")
+
+    try:
+        conn.execute("create database {}".format(DATABASE_NAME))
+        logging.info("Created database")
+        init()
+        logging.info("Setup database for migrations")
+    except ProgrammingError:
+        logging.info("Database already existed, continuing")
+    finally:
+        conn.close()

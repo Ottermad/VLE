@@ -7,6 +7,7 @@ from app.user.user_functions import get_user_by_id
 
 from .models import Permission, Role
 
+
 def set_default_permissions(request):
     """
     Create default roles and permissions for school.

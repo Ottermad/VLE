@@ -1,5 +1,6 @@
 from app import db
 
+
 from flask_bcrypt import generate_password_hash
 from app.permissions.models import user_roles, user_permissions
 from app.lessons.models import lesson_student, lesson_teacher
@@ -72,7 +73,7 @@ class User(db.Model):
         return user_dictionary
 
     def has_permissions(self, permissions):
-        users_permissions = {permission.name for permission in g.user.permissions}
+        users_permissions = {permission.name for permission in self.permissions}
         for role in self.roles:
             for permission in role.permissions:
                 users_permissions.add(permission.name)
