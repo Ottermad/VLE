@@ -152,7 +152,7 @@ def get_permission_by_id(permission_id, custom_not_found_error=None):
     permission = Permission.query.filter_by(id=permission_id).first()
 
     if permission is None:
-        if custom_not_found_error:
+        if custom_not_found_error is not None:
             raise custom_not_found_error
 
         raise NotFoundError()
@@ -160,3 +160,4 @@ def get_permission_by_id(permission_id, custom_not_found_error=None):
     #  Check permission in correct school
     if permission.school_id != g.user.school_id:
         raise UnauthorizedError()
+    return permission
