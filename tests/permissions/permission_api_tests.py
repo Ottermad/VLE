@@ -64,3 +64,20 @@ class PermissionAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertIsNotNone(permission_query.first())
+
+    def test_permission_listing(self):
+        permissions = [permission_factory.new_into_db(school_id=self.school.id)]
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.get(
+            '/permissions/permission',
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = json.loads(response.data.decode('utf-8'))
+
+        for permission in permissions:
+            self.assertIn(permission.to_dict(), json_response['permissions'])

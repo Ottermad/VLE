@@ -32,7 +32,7 @@ def permission_listing_or_create_view():
     if request.method == "POST":
         return permission_create(request)
     else:
-        permissions_list(request)
+        return permissions_list(request)
 
 
 @permissions_blueprint.route('/permission/<int:permission_id>', methods=["GET", "PUT", "DELETE"])
