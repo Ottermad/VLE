@@ -98,14 +98,14 @@ class UserViewsTestCase(unittest.TestCase):
 
     def test_user_listing_with_nest_role_permissions(self):
         # Create a user with a role
-        user = user_factory.new_into_db(roles=['ADMINISTRATOR'])
+        user = user_factory.new_into_db(school_id=self.school.id, roles=['ADMINISTRATOR'])
 
         # Get an auth token
         token = self.get_auth_token()
 
         # Get response
         response = self.client.get(
-            '/user/user?nest-role-permissions=true',
+            '/user/user?nest-roles=true&nest-role-permissions=true',
             headers={'Authorization': 'JWT ' + token})
 
         # Convert JSON back to dictionary
@@ -116,10 +116,27 @@ class UserViewsTestCase(unittest.TestCase):
 
         user_found = False
         for user_dict in dict_response['users']:
-            if user_dict['id'] == user.id:
+            if user_dict['username'] == user.username:
                 user_found = True
                 self.assertIn('roles', user_dict.keys())
                 self.assertIn('permissions', user_dict['roles'][0])
+        self.assertTrue(user_found)
+
+    def test_user_create_success(self):
+        # Get an auth token
+        token = self.get_auth_token()
+
+        mock_user = user_factory.new()
+        user_dict = mock_user.to_dict()
+        user_dict['password'] = mock_user.raw_password
 
 
+        response = self.client.post(
+            '/user/user',
+            data=json.dumps(user_dict),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
 
+        self.assertEqual(response.status_code, 201)
+        user = User.query.filter_by(username=mock_user.username, school_id=mock_user.school_id)
+        self.assertIsNotNone(user)

@@ -29,11 +29,8 @@ def user_create(request):
     data = json_from_request(request)
 
     # Validate data
-    expected_keys = ["first_name", "last_name", "password", "username", "email", "school_id"]
+    expected_keys = ["first_name", "last_name", "password", "username", "email"]
     check_keys(expected_keys, data)
-
-    if School.query.filter_by(id=data['school_id']).first() is None:
-        raise CustomError(401, message="School with id: {} does not exist.".format(data['school_id']))
 
     if User.query.filter_by(email=data['email']).first() is not None:
         raise FieldInUseError("email")
@@ -48,7 +45,7 @@ def user_create(request):
         email=data['email'],
         password=data['password'],
         username=data['username'],
-        school_id=data['school_id']
+        school_id=g.user.school_id
     )
 
     db.session.add(user)
