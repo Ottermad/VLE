@@ -3,6 +3,7 @@ import json
 
 from app import db, create_app
 
+from tests import APITestCase
 from tests.school.factories import SchoolFactory
 
 from app.user.models import User
@@ -13,42 +14,21 @@ user_factory = UserFactory()
 school_factory = SchoolFactory()
 
 
-class UserViewsTestCase(unittest.TestCase):
+class UserAPITestCase(APITestCase):
     def setUp(self):
-        self.app = create_app('testing')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-        self.client = self.app.test_client()
+        super(UserAPITestCase, self).setUp()
         self.school = school_factory.new_into_db()
         self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['CRUD_USERS'])
 
-
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-
-    def get_auth_token(self):
-        response = self.client.post(
-            '/auth',
-            headers={
-                'Content-Type': 'application/json'
-            },
-            data=json.dumps({
-                'username': self.user.username,
-                'password': self.user.raw_password
-            })
-        )
-        json_response = json.loads(response.data.decode('utf-8'))
-        return json_response['access_token']
+        super(UserAPITestCase, self).tearDown()
 
     def test_user_listing_with_no_query_params(self):
         # Create dummy users
         users = [user_factory.new_into_db(school_id=self.school.id) for i in range(0,3)]
 
         # Get an auth token
-        token = self.get_auth_token()
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
 
         # Get response
         response = self.client.get(
@@ -66,7 +46,7 @@ class UserViewsTestCase(unittest.TestCase):
 
     def test_user_listing_with_nest_roles(self):
         # Get an auth token
-        token = self.get_auth_token()
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
 
         # Get response
         response = self.client.get(
@@ -82,7 +62,7 @@ class UserViewsTestCase(unittest.TestCase):
 
     def test_user_listing_with_nest_permissions(self):
         # Get an auth token
-        token = self.get_auth_token()
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
 
         # Get response
         response = self.client.get(
@@ -101,7 +81,7 @@ class UserViewsTestCase(unittest.TestCase):
         user = user_factory.new_into_db(school_id=self.school.id, roles=['ADMINISTRATOR'])
 
         # Get an auth token
-        token = self.get_auth_token()
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
 
         # Get response
         response = self.client.get(
@@ -124,7 +104,7 @@ class UserViewsTestCase(unittest.TestCase):
 
     def test_user_create_success(self):
         # Get an auth token
-        token = self.get_auth_token()
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
 
         mock_user = user_factory.new()
         user_dict = mock_user.to_dict()

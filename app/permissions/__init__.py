@@ -21,7 +21,7 @@ permissions_blueprint = Blueprint('permissions', __name__, url_prefix='/permissi
 @permissions_blueprint.route('/set-defaults', methods=["POST"])
 @jwt_required()
 def set_defaults_view():
-    set_default_permissions(request)
+    return set_default_permissions(request)
 
 
 @permissions_blueprint.route('/permission', methods=["POST", "GET"])
