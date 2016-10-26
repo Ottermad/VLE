@@ -1,7 +1,7 @@
 from flask import jsonify, g
 
 from app import db
-from app.exceptions import CustomError, FieldInUseError
+from app.exceptions import CustomError, FieldInUseError, NotFoundError, UnauthorizedError
 from app.helper import get_boolean_query_param, json_from_request, check_keys
 from app.school.models import School
 
@@ -55,3 +55,17 @@ def user_create(request):
     db.session.commit()
 
     return jsonify({"success": True, "user": user.to_dict()}), 201
+
+
+def get_user_by_id(user_id, custom_not_found_error=None):
+    # Check user specified is in the correct school
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        if custom_not_found_error:
+            raise custom_not_found_error
+
+        raise NotFoundError()
+    if user.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    return user
