@@ -86,6 +86,12 @@ class Role(db.Model):
         self.name = name
         self.school_id = school_id
 
+    def __str__(self):
+        return "{}: {}".format(self.school_id, self.name)
+
+    def __repr__(self):
+        return self.__str__()
+
     def add_permission_by_name(self, name):
         """Add permissions to role but not commit to database."""
         permission = Permission.query.filter_by(school_id=self.school_id, name=name).first()

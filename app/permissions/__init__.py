@@ -234,3 +234,51 @@ def role_detail(role_id):
 
     # Return
     return jsonify({'success': True, "message": message})
+
+
+@permissions_blueprint.route('/role/grant', methods=["POST", "DELETE"])
+@jwt_required()
+@permissions_required({'CRUD_PERMISSIONS'})
+def grant_role():
+    """Grant a role to a user."""
+    data = json_from_request(request)
+
+    expected_keys = ["user_id", "role_id"]
+    check_keys(expected_keys, data)
+
+    # Check user specified is in the correct school
+    user = User.query.filter_by(id=data['user_id']).first()
+    if user is None:
+        raise CustomError(409, message="Invalid user_id.")
+    if user.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    #  Check the role specified is in the correct school
+    role = Role.query.filter_by(id=data['role_id']).first()
+    if role is None:
+        raise CustomError(409, message="Invalid role_id.")
+    if role.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    if request.method == "POST":
+        #  Check user does not have the permission
+        for inner_role in user.roles:
+            if inner_role.id == data['role_id']:
+                raise CustomError(409, message="User with id: {} already has role with id: {}".format(
+                    data['user_id'], data['role_id']))
+
+        user.roles.append(role)
+    elif request.method == "DELETE":
+        # Check the user has the role
+        if data['role_id'] not in [r.id for r in user.roles]:
+            raise CustomError(
+                409,
+                message="User with id: {} does not have role with id: {}".format(data['user_id'], data['role_id'])
+            )
+        user.roles.remove(role)
+
+    db.session.add(user)
+    db.session.commit()
+
+    # Return success status
+    return jsonify({'success': True}), 201

@@ -38,9 +38,9 @@ class User(db.Model):
         # Securely hash the password using bcrypt
         self.password = generate_password_hash(password)
 
-    def to_dict(self):
+    def to_dict(self, nest_roles=False, nest_role_permissions=False, nest_permissions=False):
         """Convert instance into a dict, excluding password."""
-        return {
+        user_dictionary = {
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
@@ -48,3 +48,11 @@ class User(db.Model):
             'username': self.username,
             'school_id': self.school_id
         }
+        if nest_roles:
+            user_dictionary['roles'] = [r.to_dict(nest_permissions=nest_role_permissions) for r in self.roles]
+
+
+        if nest_permissions:
+            user_dictionary['permissions'] = [p.to_dict() for p in self.permissions]
+
+        return user_dictionary
