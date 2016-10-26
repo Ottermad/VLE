@@ -13,13 +13,6 @@ user_factory = UserFactory()
 school_factory = SchoolFactory()
 
 
-class MockRequest:
-    def __init__(self):
-        self.args = {}
-
-
-
-
 class UserViewsTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app('testing')
@@ -70,3 +63,63 @@ class UserViewsTestCase(unittest.TestCase):
         self.assertTrue(dict_response['success'])
         for user in users:
             self.assertIn(user.to_dict(), dict_response['users'])
+
+    def test_user_listing_with_nest_roles(self):
+        # Get an auth token
+        token = self.get_auth_token()
+
+        # Get response
+        response = self.client.get(
+            '/user/user?nest-roles=true',
+            headers={'Authorization': 'JWT ' + token})
+
+        # Convert JSON back to dictionary
+        dict_response = json.loads(response.data.decode('utf-8'))
+
+        # Test for success
+        self.assertTrue(dict_response['success'])
+        self.assertIn('roles', dict_response['users'][0].keys())
+
+    def test_user_listing_with_nest_permissions(self):
+        # Get an auth token
+        token = self.get_auth_token()
+
+        # Get response
+        response = self.client.get(
+            '/user/user?nest-permissions=true',
+            headers={'Authorization': 'JWT ' + token})
+
+        # Convert JSON back to dictionary
+        dict_response = json.loads(response.data.decode('utf-8'))
+
+        # Test for success
+        self.assertTrue(dict_response['success'])
+        self.assertIn('permissions', dict_response['users'][0].keys())
+
+    def test_user_listing_with_nest_role_permissions(self):
+        # Create a user with a role
+        user = user_factory.new_into_db(roles=['ADMINISTRATOR'])
+
+        # Get an auth token
+        token = self.get_auth_token()
+
+        # Get response
+        response = self.client.get(
+            '/user/user?nest-role-permissions=true',
+            headers={'Authorization': 'JWT ' + token})
+
+        # Convert JSON back to dictionary
+        dict_response = json.loads(response.data.decode('utf-8'))
+
+        # Test for success
+        self.assertTrue(dict_response['success'])
+
+        user_found = False
+        for user_dict in dict_response['users']:
+            if user_dict['id'] == user.id:
+                user_found = True
+                self.assertIn('roles', user_dict.keys())
+                self.assertIn('permissions', user_dict['roles'][0])
+
+
+
