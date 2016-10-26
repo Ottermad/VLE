@@ -2,6 +2,7 @@ from app import db
 
 from flask_bcrypt import generate_password_hash
 from app.permissions.models import user_roles, user_permissions
+from app.lessons.models import lesson_student, lesson_teacher
 
 
 class User(db.Model):
@@ -11,6 +12,7 @@ class User(db.Model):
         {}
     )
 
+    # Generic properties
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     username = db.Column(db.String(120))
@@ -18,6 +20,8 @@ class User(db.Model):
     last_name = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.LargeBinary())
+
+    # Permissions and Roles
     permissions = db.relationship(
         'Permission', secondary=user_permissions,
         backref=db.backref('user_permissions', lazy='dynamic')
@@ -25,6 +29,17 @@ class User(db.Model):
     roles = db.relationship(
         'Role', secondary=user_roles,
         backref=db.backref('user_roles', lazy='dynamic')
+    )
+
+    # Lessons
+    lessons_taught = db.relationship(
+        'Lesson', secondary=lesson_teacher,
+        backref=db.backref('lesson_teacher', lazy='dynamic')
+    )
+
+    lessons_attending = db.relationship(
+        'Lesson', secondary=lesson_student,
+        backref=db.backref('lesson_student', lazy='dynamic')
     )
 
     def __init__(self, username, first_name, last_name, email, password, school_id):
@@ -50,7 +65,6 @@ class User(db.Model):
         }
         if nest_roles:
             user_dictionary['roles'] = [r.to_dict(nest_permissions=nest_role_permissions) for r in self.roles]
-
 
         if nest_permissions:
             user_dictionary['permissions'] = [p.to_dict() for p in self.permissions]
