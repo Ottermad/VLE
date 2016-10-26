@@ -3,19 +3,21 @@ import json
 from tests import APITestCase
 from tests.school.factories import SchoolFactory
 from tests.user.factories import UserFactory
+from .factories import PermissionFactory
 
 from app.user.models import User
 from app.permissions.models import Permission, Role
 
 school_factory = SchoolFactory()
 user_factory = UserFactory()
+permission_factory = PermissionFactory()
 
 
 class PermissionAPITestCase(APITestCase):
     def setUp(self):
         super(PermissionAPITestCase, self).setUp()
-        self.school = school_factory.new_into_db(without_roles=True, without_permissions=True)
-        self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['CRUD_USERS'])
+        self.school = school_factory.new_into_db()
+        self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['CRUD_USERS', 'CRUD_PERMISSIONS'])
 
     def tearDown(self):
         super(PermissionAPITestCase, self).tearDown()
@@ -43,3 +45,22 @@ class PermissionAPITestCase(APITestCase):
         self.assertIsNotNone(user_from_db)
         role_names = [role.name for role in user_from_db.roles]
         self.assertIn('ADMINISTRATOR', role_names)
+
+    def test_permission_create(self):
+        permission = permission_factory.new(school_id=self.school.id)
+
+        # Assert permission does not already exist.
+        permission_query = Permission.query.filter_by(
+            name=permission.name, school_id=self.school.id)
+        self.assertIsNone(permission_query.first())
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.post(
+            '/permissions/permission',
+            data=json.dumps(permission.to_dict()),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIsNotNone(permission_query.first())
