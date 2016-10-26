@@ -69,5 +69,7 @@ def create_app():
     app.register_blueprint(permissions_blueprint)
     from .user import user_blueprint
     app.register_blueprint(user_blueprint)
+    from .lessons import lessons_blueprint
+    app.register_blueprint(lessons_blueprint)
 
     return app
