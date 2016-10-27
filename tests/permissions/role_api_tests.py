@@ -85,3 +85,53 @@ class RoleAPITestCase(APITestCase):
         self.assertIn('role', json_response.keys())
 
         self.assertEqual(role.to_dict(nest_permissions=True), json_response['role'])
+
+    def test_role_delete(self):
+        role = role_factory.new_into_db(school_id=self.school.id)
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.delete(
+            '/permissions/role/{}'.format(role.id),
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        role_from_db = Role.query.get(role.id)
+        self.assertIsNone(role_from_db)
+
+    def test_role_update_name(self):
+        role = role_factory.new_into_db(school_id=self.school.id)
+        new_name = 'New Name'
+        self.assertNotEqual(role.name, new_name)
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.put(
+            '/permissions/role/{}'.format(role.id),
+            data=json.dumps({'name': new_name}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        role_from_db = Role.query.get(role.id)
+        self.assertEqual(new_name, role_from_db.name)
+
+    def test_role_update_permissions(self):
+        permission = permission_factory.new_into_db(school_id=self.school.id)
+        role = role_factory.new_into_db(school_id=self.school.id, permissions=[])
+        self.assertEqual(role.permissions, [])
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.put(
+            '/permissions/role/{}'.format(role.id),
+            data=json.dumps({'permissions': [permission.id]}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        role_from_db = Role.query.get(role.id)
+        self.assertEqual(permission.id, role_from_db.permissions[0].id)
