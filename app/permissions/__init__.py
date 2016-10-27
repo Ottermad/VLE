@@ -53,9 +53,9 @@ def permission_detail_view(permission_id):
 def grant__or_remove_permission_view():
     """Grant a permission to a user."""
     if request.method == "POST":
-        grant_permission(request)
+        return grant_permission(request)
     elif request.method == "DELETE":
-        remove_permission(request)
+        return remove_permission(request)
 
 
 @permissions_blueprint.route('/role', methods=["POST", "GET"])

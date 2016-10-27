@@ -152,3 +152,38 @@ class PermissionAPITestCase(APITestCase):
 
         self.assertIsNotNone(permission_from_db)
         self.assertEqual(permission_from_db.description, new_description)
+
+    def test_grant_permission(self):
+        user = user_factory.new_into_db(school_id=self.school.id)
+        permission = permission_factory.new_into_db(school_id=self.school.id)
+        self.assertNotIn(permission.id, [p.id for p in user.permissions])
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.post(
+            '/permissions/permission/grant'.format(permission.id),
+            data=json.dumps({'user_id': user.id, 'permission_id': permission.id}),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        # Do not need to fetch a new user object as permissions runs it's own query
+        self.assertIn(permission.id, [p.id for p in user.permissions])
+
+    def test_revoke_permission(self):
+        permission = permission_factory.new_into_db(school_id=self.school.id)
+        user = user_factory.new_into_db(school_id=self.school.id, permissions=[permission.name])
+        self.assertIn(permission.id, [p.id for p in user.permissions])
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.delete(
+            '/permissions/permission/grant'.format(permission.id),
+            data=json.dumps({'user_id': user.id, 'permission_id': permission.id}),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        # Do not need to fetch a new user object as permissions runs it's own query
+        self.assertNotIn(permission.id, [p.id for p in user.permissions])

@@ -144,7 +144,7 @@ def remove_permission(request):
     db.session.commit()
 
     # Return success status
-    return jsonify({'success': True}), 201
+    return jsonify({'success': True}), 200
 
 
 def get_permission_by_id(permission_id, custom_not_found_error=None):
