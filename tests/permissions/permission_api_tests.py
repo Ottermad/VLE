@@ -97,3 +97,58 @@ class PermissionAPITestCase(APITestCase):
         json_response = json.loads(response.data.decode('utf-8'))
 
         self.assertEqual(permission.id, json_response['permission']['id'])
+
+    def test_permission_delete(self):
+        permission = permission_factory.new_into_db(school_id=self.school.id)
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.delete(
+            '/permissions/permission/{}'.format(permission.id),
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        permission_from_db = Permission.query.get(permission.id)
+        self.assertIsNone(permission_from_db)
+
+    def test_permission_update_name(self):
+        permission = permission_factory.new_into_db(school_id=self.school.id)
+        new_name = 'New Name'
+        self.assertNotEqual(permission.name, new_name)
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.put(
+            '/permissions/permission/{}'.format(permission.id),
+            data=json.dumps({'name': new_name}),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        permission_from_db = Permission.query.get(permission.id)
+
+        self.assertIsNotNone(permission_from_db)
+        self.assertEqual(permission_from_db.name, new_name)
+
+    def test_permission_update_description(self):
+        permission = permission_factory.new_into_db(school_id=self.school.id)
+        new_description = 'Description which is new'
+        self.assertNotEqual(permission.name, new_description)
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.put(
+            '/permissions/permission/{}'.format(permission.id),
+            data=json.dumps({'description': new_description}),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        permission_from_db = Permission.query.get(permission.id)
+
+        self.assertIsNotNone(permission_from_db)
+        self.assertEqual(permission_from_db.description, new_description)
