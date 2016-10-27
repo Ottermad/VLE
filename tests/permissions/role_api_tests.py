@@ -49,3 +49,22 @@ class RoleAPITestCase(APITestCase):
 
         for permission in permissions:
             self.assertIn(permission.id, role_permission_ids)
+
+    def test_role_listing(self):
+        roles = [role_factory.new_into_db(school_id=self.school.id) for i in range(0, 3)]
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.get(
+            '/permissions/role',
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = json.loads(response.data.decode('utf-8'))
+
+        self.assertIn('roles', json_response.keys())
+
+        for role in roles:
+            self.assertIn(role.to_dict(nest_permissions=True), json_response['roles'])
