@@ -100,8 +100,9 @@ def role_listing(request):
 
 
 def role_detail(request, role_id):
+    # TODO: Set nest-permissions as a query param
     role = get_role_by_id(role_id)
-    return jsonify({'success': True, 'role': role.to_dict()})
+    return jsonify({'success': True, 'role': role.to_dict(nest_permissions=True)})
 
 
 def role_delete(request, role_id):
