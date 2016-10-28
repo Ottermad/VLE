@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask.ext.jwt import jwt_required
 
-from app.lessons.subject_functions import create_subject_view
+from app.lessons.subject_functions import create_subject_view, list_subject_view
 
 lessons_blueprint = Blueprint('lessons', __name__, url_prefix='/lessons')
 
@@ -16,6 +16,8 @@ def index():
 def subject_list_or_create_view():
     if request.method == "POST":
         return create_subject_view(request)
+    else:
+        return list_subject_view(request)
 
 
 @lessons_blueprint.route('/subject/<int:id>', methods=['GET', 'PUT', 'DELETE'])

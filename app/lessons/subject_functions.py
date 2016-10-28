@@ -25,3 +25,13 @@ def create_subject_view(request):
     subject = create_subject(data['name'], g.user.school_id)
 
     return jsonify({'success': True, 'subject': subject.to_dict()}), 201
+
+
+def subjects_for_school(school_id):
+    return Subject.query.filter_by(school_id=school_id).all()
+
+
+def list_subject_view(request):
+    # Get subjects and convert to dicts
+    subjects = [s.to_dict() for s in subjects_for_school(g.user.school_id)]
+    return jsonify({'success': True, 'subjects': subjects})
