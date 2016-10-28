@@ -35,8 +35,6 @@ def create_database():
     try:
         conn.execute("create database {}".format(DATABASE_NAME))
         logging.info("Created database")
-        init()
-        logging.info("Setup database for migrations")
     except ProgrammingError:
         logging.info("Database already existed, continuing")
     finally:
