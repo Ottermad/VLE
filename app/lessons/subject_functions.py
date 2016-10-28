@@ -1,7 +1,7 @@
 from flask import g, jsonify
 
 from app import db
-from app.exceptions import FieldInUseError
+from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError
 from app.helper import json_from_request, check_keys
 from app.lessons.models import Subject
 
@@ -35,3 +35,22 @@ def list_subject_view(request):
     # Get subjects and convert to dicts
     subjects = [s.to_dict() for s in subjects_for_school(g.user.school_id)]
     return jsonify({'success': True, 'subjects': subjects})
+
+
+def subject_detail_view(request, subject_id):
+    subject = get_subject_by_id(subject_id)
+    return jsonify({'success': True, 'subject': subject.to_dict()})
+
+
+def get_subject_by_id(subject_id, custom_not_found_error=None):
+    # Check user specified is in the correct school
+    subject = Subject.query.filter_by(id=subject_id).first()
+    if subject is None:
+        if custom_not_found_error:
+            raise custom_not_found_error
+
+        raise NotFoundError()
+    if subject.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    return subject

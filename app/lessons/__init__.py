@@ -1,7 +1,8 @@
 from flask import Blueprint, request
 from flask.ext.jwt import jwt_required
 
-from app.lessons.subject_functions import create_subject_view, list_subject_view
+from app.lessons.subject_functions import create_subject_view, list_subject_view, \
+    subject_detail_view
 
 lessons_blueprint = Blueprint('lessons', __name__, url_prefix='/lessons')
 
@@ -20,10 +21,11 @@ def subject_list_or_create_view():
         return list_subject_view(request)
 
 
-@lessons_blueprint.route('/subject/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@lessons_blueprint.route('/subject/<subject_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
-def subject_detail_view(id):
-    pass
+def subject_individual_view(subject_id):
+    if request.method == 'GET':
+        return subject_detail_view(request, subject_id=subject_id)
 
 
 @lessons_blueprint.route('/lesson', methods=['POST', 'GET'])

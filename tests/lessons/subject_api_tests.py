@@ -71,7 +71,30 @@ class SubjectAPITestCase(APITestCase):
         self.assertIn(subject.to_dict(), json_data['subjects'])
 
     def test_subject_detail(self):
-        pass
+        # Create subject
+        subject = self.subject_factory.new_into_db()
+
+        # Get JWT token needed
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        # Send request and get response
+        response = self.client.get(
+            '/lessons/subject/{}'.format(subject.id),
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        # Check response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Parse json returned
+        # response.data is a bytes not a string so needs to be converted
+        json_data = json.loads(response.data.decode('utf-8'))
+
+        # Make sure JSON returned has the key subject
+        self.assertIn('subject', json_data.keys())
+
+        # Make sure our subject is in data returned
+        self.assertEqual(subject.to_dict(), json_data['subject'])
 
     def test_update_subject(self):
         pass
