@@ -7,14 +7,21 @@ from app.lessons.models import Subject
 
 
 def create_subject(name, school_id):
-    # Check name does not already exist for school
-    if Subject.query.filter_by(name=name, school_id=school_id).first() is not None:
+    if subject_name_in_use(name, school_id):
         raise FieldInUseError()
 
     subject = Subject(name=name, school_id=school_id)
     db.session.add(subject)
     db.session.commit()
     return subject
+
+
+def subject_name_in_use(name, school_id):
+    # Check name does not already exist for school
+    query = Subject.query.filter_by(
+        name=name, school_id=school_id
+    )
+    return query.first() is not None
 
 
 def create_subject_view(request):
@@ -46,7 +53,25 @@ def subject_delete_view(request, subject_id):
     subject = get_subject_by_id(subject_id)
     db.session.delete(subject)
     db.session.commit()
-    return jsonify({'success': True, 'message': 'Deleted'})
+    return jsonify({'success': True, 'message': 'Deleted.'})
+
+
+def subject_update_view(request, subject_id):
+    # Get subject
+    subject = get_subject_by_id(subject_id)
+
+    # Get JSON data
+    data = json_from_request(request)
+
+    # If name in data, then update the name
+    if 'name' in data.keys():
+        if subject_name_in_use(data['name'], school_id=subject.school_id):
+            raise FieldInUseError()
+        subject.name = data['name']
+
+    db.session.add(subject)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Updated.'})
 
 
 def get_subject_by_id(subject_id, custom_not_found_error=None):

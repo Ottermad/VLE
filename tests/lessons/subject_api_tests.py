@@ -1,11 +1,16 @@
 import json
 
+from faker import Faker
+
 from tests import APITestCase
 from tests.school.factories import SchoolFactory
 from tests.user.factories import UserFactory
 from .factories import SubjectFactory
 
 from app.lessons.models import Subject
+
+
+fake = Faker()
 
 
 class SubjectAPITestCase(APITestCase):
@@ -97,7 +102,30 @@ class SubjectAPITestCase(APITestCase):
         self.assertEqual(subject.to_dict(), json_data['subject'])
 
     def test_update_subject(self):
-        pass
+        # Create subject
+        subject = self.subject_factory.new_into_db()
+
+        # Generate new name
+        new_name = 'New Name'
+
+        # Assert names are different
+        self.assertNotEqual(subject.name, new_name)
+
+        # Send request
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.put(
+            '/lessons/subject/{}'.format(subject.id),
+            data=json.dumps({'name': new_name}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        # Check status code
+        self.assertEqual(response.status_code, 200)
+
+        # Check subject updated
+        subject = Subject.query.get(subject.id)
+        self.assertEqual(subject.name, new_name)
 
     def test_delete_subject(self):
         # Create subject
