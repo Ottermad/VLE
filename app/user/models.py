@@ -72,9 +72,15 @@ class User(db.Model):
 
         return user_dictionary
 
-    def has_permissions(self, permissions):
+    def has_permissions(self, permissions, include_roles=True):
         users_permissions = {permission.name for permission in self.permissions}
-        for role in self.roles:
-            for permission in role.permissions:
-                users_permissions.add(permission.name)
+
+        if include_roles:
+            for role in self.roles:
+                for permission in role.permissions:
+                    users_permissions.add(permission.name)
         return permissions.issubset(users_permissions)
+
+    def has_roles(self, roles):
+        users_roles = {role.name for role in self.roles}
+        return roles.issubset(users_roles)

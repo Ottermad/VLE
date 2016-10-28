@@ -56,7 +56,7 @@ def remove_role(request):
     db.session.commit()
 
     # Return success status
-    return jsonify({'success': True}), 201
+    return jsonify({'success': True}), 200
 
 
 def role_create(request):

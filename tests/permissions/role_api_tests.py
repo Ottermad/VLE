@@ -135,3 +135,53 @@ class RoleAPITestCase(APITestCase):
 
         role_from_db = Role.query.get(role.id)
         self.assertEqual(permission.id, role_from_db.permissions[0].id)
+
+    def test_grant_role(self):
+        user = user_factory.new_into_db(school_id=self.school.id)
+        role = role_factory.new_into_db(school_id=self.school.id)
+        self.assertFalse(user.has_roles({role.name}))
+
+        data_to_send = {
+            'user_id': user.id,
+            'role_id': role.id,
+        }
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.post(
+            '/permissions/role/grant',
+            data=json.dumps(data_to_send),
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'JWT ' + token
+            }
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(user.has_roles({role.name}))
+
+    def test_remove_role(self):
+        role = role_factory.new_into_db(school_id=self.school.id)
+        user = user_factory.new_into_db(
+            school_id=self.school.id, roles=[role.name])
+
+        self.assertTrue(user.has_roles({role.name}))
+
+        data_to_send = {
+            'user_id': user.id,
+            'role_id': role.id,
+        }
+
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.delete(
+            '/permissions/role/grant',
+            data=json.dumps(data_to_send),
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': 'JWT ' + token
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(user.has_roles({role.name}))
