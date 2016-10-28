@@ -100,4 +100,25 @@ class SubjectAPITestCase(APITestCase):
         pass
 
     def test_delete_subject(self):
-        pass
+        # Create subject
+        subject = self.subject_factory.new_into_db()
+
+        # Assert that subject is in the database
+        subject_from_db = Subject.query.get(subject.id)
+        self.assertIsNotNone(subject_from_db)
+
+        # Get JWT token needed
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        # Send request and get response
+        response = self.client.delete(
+            '/lessons/subject/{}'.format(subject.id),
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        # Check response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Check subject is no longer in database
+        subject_from_db = Subject.query.get(subject.id)
+        self.assertIsNone(subject_from_db)

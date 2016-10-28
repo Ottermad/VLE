@@ -42,6 +42,13 @@ def subject_detail_view(request, subject_id):
     return jsonify({'success': True, 'subject': subject.to_dict()})
 
 
+def subject_delete_view(request, subject_id):
+    subject = get_subject_by_id(subject_id)
+    db.session.delete(subject)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Deleted'})
+
+
 def get_subject_by_id(subject_id, custom_not_found_error=None):
     # Check user specified is in the correct school
     subject = Subject.query.filter_by(id=subject_id).first()
