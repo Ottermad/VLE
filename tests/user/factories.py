@@ -12,8 +12,10 @@ school_factory = SchoolFactory()
 
 
 class UserFactory:
-    def __init__(self):
-        self.school = school_factory.new()
+    def __init__(self, school=None):
+        self.school = school
+        if school is None:
+            self.school = school_factory.new()
 
     def new(self, school_id=None, permissions=[], roles=[]):
         if school_id is None:

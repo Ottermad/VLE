@@ -49,14 +49,15 @@ class Lesson(db.Model):
 
     def __init__(self, name, subject_id, school_id):
         self.name = name
-        self.subject = subject_id
+        self.subject_id = subject_id
         self.school_id = school_id
 
     def to_dict(self, nest_teachers=False, nest_students=False):
         lesson_as_dict = {
             'id': self.id,
             'name': self.name,
-            'school_id': self.school_id
+            'school_id': self.school_id,
+            'subject_id': self.subject_id
         }
 
         if nest_teachers:

@@ -11,7 +11,7 @@ class CustomError(Exception):
 class MissingKeyError(CustomError):
     """Error for when a request is missing a key."""
     def __init__(self, key):
-        super().__init__(401, message="Missing key: {}".format(key))
+        super().__init__(409, message="Missing key: {}".format(key))
 
 
 class NoJSONError(CustomError):

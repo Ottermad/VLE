@@ -76,9 +76,9 @@ def create_app(config_name="default"):
     app.register_blueprint(school_blueprint)
     from .permissions import permissions_blueprint
     app.register_blueprint(permissions_blueprint)
-    from .user import user_blueprint
+    from app.user.views import user_blueprint
     app.register_blueprint(user_blueprint)
-    from .lessons import lessons_blueprint
+    from app.lessons.views import lessons_blueprint
     app.register_blueprint(lessons_blueprint)
 
     return app

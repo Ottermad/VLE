@@ -3,7 +3,7 @@ from flask import jsonify, g
 from app import CustomError, db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError
 from app.helper import json_from_request, check_keys
-from app.user.user_functions import get_user_by_id
+from app.user.helper_functions import get_user_by_id
 
 from .models import Role, Permission
 
