@@ -33,6 +33,18 @@ class Permission(db.Model):
 
     DEFAULTS = [
         {
+            "name": "Administrator",
+            "description": "Allows a user to be an admin."
+        },
+        {
+            "name": "Teacher",
+            "description": "Allows a user to be a teacher."
+        },
+        {
+            "name": "Student",
+            "description": "Allows a user to be a student."
+        },
+        {
             "name": "CRUD_USERS",
             "description": "Allows a user to create, read, update and delete users."
         },

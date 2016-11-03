@@ -26,7 +26,7 @@ def set_defaults_view():
 
 @permissions_blueprint.route('/permission', methods=["POST", "GET"])
 @jwt_required()
-@permissions_required({'CRUD_PERMISSIONS'})
+@permissions_required({'Administrator'})
 def permission_listing_or_create_view():
     """Return a list of all permissions for a school or create a new one."""
     if request.method == "POST":
@@ -37,7 +37,7 @@ def permission_listing_or_create_view():
 
 @permissions_blueprint.route('/permission/<int:permission_id>', methods=["GET", "PUT", "DELETE"])
 @jwt_required()
-@permissions_required({'CRUD_PERMISSIONS'})
+@permissions_required({'Administrator'})
 def permission_detail_view(permission_id):
     if request.method == "GET":
         return permission_detail(request, permission_id)
@@ -49,7 +49,7 @@ def permission_detail_view(permission_id):
 
 @permissions_blueprint.route('/permission/grant', methods=["POST", "DELETE"])
 @jwt_required()
-@permissions_required({'CRUD_PERMISSIONS'})
+@permissions_required({'Administrator'})
 def grant__or_remove_permission_view():
     """Grant a permission to a user."""
     if request.method == "POST":
@@ -60,7 +60,7 @@ def grant__or_remove_permission_view():
 
 @permissions_blueprint.route('/role', methods=["POST", "GET"])
 @jwt_required()
-@permissions_required({'CRUD_PERMISSIONS'})
+@permissions_required({'Administrator'})
 def role_listing_or_create_view():
     """Return a list of all roles for a school or create a new one."""
     if request.method == "POST":
@@ -71,7 +71,7 @@ def role_listing_or_create_view():
 
 @permissions_blueprint.route('/role/<int:role_id>', methods=["GET", "PUT", "DELETE"])
 @jwt_required()
-@permissions_required({'CRUD_PERMISSIONS'})
+@permissions_required({'Administrator'})
 def role_detail_view(role_id):
     if request.method == "GET":
         return role_detail(request, role_id)
@@ -83,7 +83,7 @@ def role_detail_view(role_id):
 
 @permissions_blueprint.route('/role/grant', methods=["POST", "DELETE"])
 @jwt_required()
-@permissions_required({'CRUD_PERMISSIONS'})
+@permissions_required({'Administrator'})
 def grant_or_remove_role_view():
     """Grant a role to a user or remove a role from a user."""
     if request.method == "POST":

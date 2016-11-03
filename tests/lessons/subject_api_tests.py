@@ -21,7 +21,7 @@ class SubjectAPITestCase(APITestCase):
         self.school = self.school_factory.new_into_db()
         self.user = self.user_factory.new_into_db(
             school_id=self.school.id,
-            permissions=['CRUD_USERS', 'CRUD_PERMISSIONS']
+            permissions=['Administrator']
         )
         self.subject_factory = SubjectFactory(self.school)
 

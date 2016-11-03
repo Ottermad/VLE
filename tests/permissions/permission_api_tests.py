@@ -17,7 +17,7 @@ class PermissionAPITestCase(APITestCase):
     def setUp(self):
         super(PermissionAPITestCase, self).setUp()
         self.school = school_factory.new_into_db()
-        self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['CRUD_USERS', 'CRUD_PERMISSIONS'])
+        self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['Administrator'])
 
     def tearDown(self):
         super(PermissionAPITestCase, self).tearDown()

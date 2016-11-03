@@ -18,7 +18,7 @@ class UserAPITestCase(APITestCase):
     def setUp(self):
         super(UserAPITestCase, self).setUp()
         self.school = school_factory.new_into_db()
-        self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['CRUD_USERS'])
+        self.user = user_factory.new_into_db(school_id=self.school.id, permissions=['Administrator'])
 
     def tearDown(self):
         super(UserAPITestCase, self).tearDown()
@@ -109,7 +109,6 @@ class UserAPITestCase(APITestCase):
         mock_user = user_factory.new()
         user_dict = mock_user.to_dict()
         user_dict['password'] = mock_user.raw_password
-
 
         response = self.client.post(
             '/user/user',

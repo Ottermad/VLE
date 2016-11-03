@@ -13,7 +13,7 @@ def index_view():
 
 @user_blueprint.route("/user", methods=["GET", "POST"])
 @jwt_required()
-@permissions_required({'CRUD_USERS'})
+@permissions_required({'Administrator'})
 def user_listing_or_create_view():
     """Route to create User from a POST request."""
     if request.method == "GET":
