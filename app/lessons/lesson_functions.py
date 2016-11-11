@@ -54,3 +54,9 @@ def lesson_create(request):
     db.session.commit()
 
     return jsonify({'success': True, 'lesson': lesson.to_dict(nest_teachers=True, nest_students=True)}), 201
+
+
+def lesson_listing(request):
+    # Get all lessons from school
+    lessons = Lesson.query.filter_by(school_id=g.user.school_id)
+    return jsonify({'success': True, 'lessons': [lesson.to_dict() for lesson in lessons]})

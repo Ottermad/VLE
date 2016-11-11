@@ -1,8 +1,8 @@
 from app.lessons.subject_functions import create_subject_view, list_subject_view, subject_detail_view, subject_delete_view, \
     subject_update_view
-from app.lessons.lesson_functions import lesson_create
+from app.lessons.lesson_functions import lesson_create, lesson_listing
 from flask import Blueprint, request
-from flask.ext.jwt import jwt_required
+from flask_jwt import jwt_required
 
 lessons_blueprint = Blueprint('lessons', __name__, url_prefix='/lessons')
 
@@ -37,6 +37,8 @@ def subject_individual_view(subject_id):
 def lesson_list_or_create_view():
     if request.method == "POST":
         return lesson_create(request)
+    if request.method == "GET":
+        return lesson_listing(request)
 
 
 @lessons_blueprint.route('/lesson/<int:id>', methods=['GET', 'PUT', 'DELETE'])
