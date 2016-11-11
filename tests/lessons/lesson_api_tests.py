@@ -80,4 +80,21 @@ class LessonAPITestCase(APITestCase):
         for lesson in lessons:
             self.assertIn(lesson.to_dict(), json_response['lessons'])
 
+    def test_lesson_detail(self):
+        lesson = self.lesson_factory.new_into_db()
 
+        token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
+
+        response = self.client.get(
+            '/lessons/lesson/{}'.format(lesson.id),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = json.loads(response.data.decode('utf-8'))
+
+        self.assertIn('lesson', json_response.keys())
+
+        # Make sure our lesson is in data returned
+        self.assertEqual(lesson.to_dict(), json_response['lesson'])

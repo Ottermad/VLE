@@ -1,6 +1,6 @@
 from app import db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError,CustomError
-from app.helper import json_from_request, check_keys
+from app.helper import json_from_request, check_keys, get_record_by_id
 from app.lessons.models import Lesson, Subject
 from app.user.helper_functions import get_user_by_id
 from flask import jsonify
@@ -63,18 +63,5 @@ def lesson_listing(request):
 
 
 def lesson_detail(request, lesson_id):
-    pass
-
-
-def get_record_by_id(model_id, model, custom_not_found_error=None):
-    # Check user specified is in the correct school
-    record = model.query.filter_by(id=model_id).first()
-    if record is None:
-        if custom_not_found_error:
-            raise custom_not_found_error
-
-        raise NotFoundError()
-    if record.school_id != g.user.school_id:
-        raise UnauthorizedError()
-
-    return record
+    lesson = get_record_by_id(lesson_id, Lesson)
+    return jsonify({'success': True, 'lesson': lesson.to_dict()})

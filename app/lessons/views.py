@@ -1,6 +1,6 @@
 from app.lessons.subject_functions import create_subject_view, list_subject_view, subject_detail_view, subject_delete_view, \
     subject_update_view
-from app.lessons.lesson_functions import lesson_create, lesson_listing
+from app.lessons.lesson_functions import lesson_create, lesson_listing, lesson_detail
 from flask import Blueprint, request
 from flask_jwt import jwt_required
 
@@ -45,4 +45,4 @@ def lesson_list_or_create_view():
 @jwt_required()
 def lesson_detail_view(id):
     if request.method == 'GET':
-        pass
+        return lesson_detail(request, lesson_id=id)
