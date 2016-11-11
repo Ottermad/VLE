@@ -2,7 +2,7 @@ from flask import g, jsonify
 
 from app import db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError
-from app.helper import json_from_request, check_keys
+from app.helper import json_from_request, check_keys, get_record_by_id
 from app.lessons.models import Subject
 
 
@@ -45,12 +45,12 @@ def list_subject_view(request):
 
 
 def subject_detail_view(request, subject_id):
-    subject = get_subject_by_id(subject_id)
+    subject = get_record_by_id(subject_id, Subject)
     return jsonify({'success': True, 'subject': subject.to_dict()})
 
 
 def subject_delete_view(request, subject_id):
-    subject = get_subject_by_id(subject_id)
+    subject = get_record_by_id(subject_id, Subject)
     db.session.delete(subject)
     db.session.commit()
     return jsonify({'success': True, 'message': 'Deleted.'})
@@ -58,7 +58,7 @@ def subject_delete_view(request, subject_id):
 
 def subject_update_view(request, subject_id):
     # Get subject
-    subject = get_subject_by_id(subject_id)
+    subject = get_record_by_id(subject_id, Subject)
 
     # Get JSON data
     data = json_from_request(request)
@@ -74,15 +74,15 @@ def subject_update_view(request, subject_id):
     return jsonify({'success': True, 'message': 'Updated.'})
 
 
-def get_subject_by_id(subject_id, custom_not_found_error=None):
-    # Check user specified is in the correct school
-    subject = Subject.query.filter_by(id=subject_id).first()
-    if subject is None:
-        if custom_not_found_error:
-            raise custom_not_found_error
-
-        raise NotFoundError()
-    if subject.school_id != g.user.school_id:
-        raise UnauthorizedError()
-
-    return subject
+# def get_subject_by_id(subject_id, custom_not_found_error=None):
+#     # Check user specified is in the correct school
+#     subject = Subject.query.filter_by(id=subject_id).first()
+#     if subject is None:
+#         if custom_not_found_error:
+#             raise custom_not_found_error
+#
+#         raise NotFoundError()
+#     if subject.school_id != g.user.school_id:
+#         raise UnauthorizedError()
+#
+#     return subject

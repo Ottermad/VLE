@@ -1,11 +1,10 @@
 from app import db
-from app.exceptions import CustomError
+from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError,CustomError
 from app.helper import json_from_request, check_keys
 from app.lessons.models import Lesson, Subject
 from app.user.helper_functions import get_user_by_id
 from flask import jsonify
 from flask.globals import g
-from .subject_functions import get_subject_by_id
 
 
 def lesson_create(request):
@@ -17,8 +16,9 @@ def lesson_create(request):
     check_keys(expected_keys=expected_keys, data=data)
 
     # Validate subject_id
-    subject = get_subject_by_id(
+    subject = get_record_by_id(
         data['subject_id'],
+        Subject,
         custom_not_found_error=CustomError(409, message="Invalid subject_id.")
     )
     # Create lesson
@@ -60,3 +60,21 @@ def lesson_listing(request):
     # Get all lessons from school
     lessons = Lesson.query.filter_by(school_id=g.user.school_id)
     return jsonify({'success': True, 'lessons': [lesson.to_dict() for lesson in lessons]})
+
+
+def lesson_detail(request, lesson_id):
+    pass
+
+
+def get_record_by_id(model_id, model, custom_not_found_error=None):
+    # Check user specified is in the correct school
+    record = model.query.filter_by(id=model_id).first()
+    if record is None:
+        if custom_not_found_error:
+            raise custom_not_found_error
+
+        raise NotFoundError()
+    if record.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    return record

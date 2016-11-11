@@ -44,4 +44,5 @@ def lesson_list_or_create_view():
 @lessons_blueprint.route('/lesson/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 def lesson_detail_view(id):
-    pass
+    if request.method == 'GET':
+        pass

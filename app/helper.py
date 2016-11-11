@@ -1,4 +1,5 @@
-from .exceptions import NoJSONError, MissingKeyError
+from .exceptions import NoJSONError, MissingKeyError, NotFoundError, UnauthorizedError
+from flask import g
 
 
 def json_from_request(request):
@@ -19,3 +20,17 @@ def get_boolean_query_param(request, param_name):
     if param is not None:
          return param.lower() == "true"
     return False
+
+
+def get_record_by_id(model_id, model, custom_not_found_error=None):
+    # Check user specified is in the correct school
+    record = model.query.filter_by(id=model_id).first()
+    if record is None:
+        if custom_not_found_error:
+            raise custom_not_found_error
+
+        raise NotFoundError()
+    if record.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    return record
