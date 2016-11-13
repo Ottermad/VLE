@@ -98,3 +98,18 @@ class LessonAPITestCase(APITestCase):
 
         # Make sure our lesson is in data returned
         self.assertEqual(lesson.to_dict(), json_response['lesson'])
+
+    def test_lesson_delete(self):
+        lesson = self.lesson_factory.new_into_db()
+
+        token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
+
+        response = self.client.delete(
+            '/lessons/lesson/{}'.format(lesson.id),
+            headers={'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        lesson_from_db = Lesson.query.get(lesson.id)
+        self.assertIsNone(lesson_from_db)

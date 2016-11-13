@@ -1,7 +1,7 @@
 from app.permissions import permissions_required
 from app.user.user_functions import user_listing, user_create
 from flask import Blueprint, request
-from flask.ext.jwt import jwt_required
+from flask_jwt import jwt_required
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/user")
 

@@ -65,3 +65,11 @@ def lesson_listing(request):
 def lesson_detail(request, lesson_id):
     lesson = get_record_by_id(lesson_id, Lesson)
     return jsonify({'success': True, 'lesson': lesson.to_dict()})
+
+
+def lesson_delete(request, lesson_id):
+    lesson = get_record_by_id(lesson_id, Lesson)
+    db.session.delete(lesson)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Deleted.'})
