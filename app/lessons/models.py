@@ -1,6 +1,5 @@
 from app import db
 
-
 lesson_teacher = db.Table(
     'lesson_teacher',
     db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id')),

@@ -1,5 +1,5 @@
 from app.exceptions import NotFoundError, UnauthorizedError
-from app.user.models import User
+from .models import User
 from flask import g
 
 

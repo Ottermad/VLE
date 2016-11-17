@@ -43,6 +43,9 @@ class LessonFactory:
             school_id=self.school.id,
             subject_id=subject.id
         )
+        while Lesson.query.filter_by(name=lesson.name, school_id=self.school.id).first() is not None:
+            lesson.name = fake.first_name()
+
         lesson.id = id
         return lesson
 

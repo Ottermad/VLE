@@ -30,12 +30,16 @@ class LessonAPITestCase(APITestCase):
 
     def test_lesson_create(self):
         lesson = self.lesson_factory.new()
-        lesson.teachers = [self.user_factory.new_into_db() for i in range(0, 3)]
-        lesson.students = [self.user_factory.new_into_db() for i in range(0, 3)]
+        self.user_factory.new_into_db()
+        for i in range(0, 3):
+            # lesson.teachers.append(self.user_factory.new_into_db())
+            # lesson.students.append(self.user_factory.new_into_db())
+            pass
 
         lesson_as_json = lesson.to_dict()
-        lesson_as_json['teacher_ids'] = [t.id for t in lesson.teachers]
-        lesson_as_json['student_ids'] = [s.id for s in lesson.students]
+
+        lesson_as_json['teacher_ids'] = [self.user_factory.new_into_db().id for i in range(0, 3)]
+        lesson_as_json['student_ids'] = [self.user_factory.new_into_db().id for i in range(0, 3)]
 
         token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
 
@@ -54,11 +58,13 @@ class LessonAPITestCase(APITestCase):
 
         self.assertIn('lesson', json_response.keys())
         self.assertIn('teachers', json_response['lesson'].keys())
-        for teacher in lesson.teachers:
+        for teacher_id in lesson_as_json['teacher_ids']:
+            teacher = User.query.get(teacher_id)
             self.assertIn(teacher.to_dict(), json_response['lesson']['teachers'])
 
         self.assertIn('students', json_response['lesson'].keys())
-        for student in lesson.students:
+        for student_id in lesson_as_json['student_ids']:
+            student = User.query.get(student_id)
             self.assertIn(student.to_dict(), json_response['lesson']['students'])
 
     def test_lesson_listing(self):

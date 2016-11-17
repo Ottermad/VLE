@@ -1,9 +1,10 @@
+from app.user.models import User
 from flask import g, jsonify
 
 from app import CustomError, db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError
-from app.helper import json_from_request, check_keys
-from app.user.helper_functions import get_user_by_id
+from app.helper import json_from_request, check_keys, get_record_by_id
+# from app.user.helper_functions import get_user_by_id
 
 from .models import Permission, Role
 
@@ -99,7 +100,7 @@ def grant_permission(request):
     check_keys(expected_keys, data)
 
     # Check user specified is in the correct school
-    user = get_user_by_id(data['user_id'], CustomError(409, message="Invalid user_id."))
+    user = get_record_by_id(data['user_id'], User, CustomError(409, message="Invalid user_id."))
 
     #  Check the permission specified is in the correct school
     permission = get_permission_by_id(data['permission_id'], CustomError(409, message="Invalid permission_id."))
@@ -125,7 +126,7 @@ def remove_permission(request):
     check_keys(expected_keys, data)
 
     # Check user specified is in the correct school
-    user = get_user_by_id(data['user_id'], CustomError(409, message="Invalid user_id."))
+    user = get_record_by_id(data['user_id'], User, CustomError(409, message="Invalid user_id."))
 
     #  Check the permission specified is in the correct school
     permission = get_permission_by_id(data['permission_id'], CustomError(409, message="Invalid permission_id."))
