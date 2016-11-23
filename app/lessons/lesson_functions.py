@@ -96,7 +96,7 @@ def lesson_update(request, lesson_id):
         add_teachers(json_data['teacher_ids'], lesson)
 
     if "student_ids" in json_data.keys():
-        lesson.teachers = []
+        lesson.students = []
         add_students(json_data['student_ids'], lesson)
 
     db.session.add(lesson)

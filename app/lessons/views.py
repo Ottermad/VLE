@@ -1,6 +1,6 @@
 from app.lessons.subject_functions import create_subject_view, list_subject_view, subject_detail_view, subject_delete_view, \
     subject_update_view
-from app.lessons.lesson_functions import lesson_create, lesson_listing, lesson_detail, lesson_delete
+from app.lessons.lesson_functions import lesson_create, lesson_listing, lesson_detail, lesson_delete, lesson_update
 from flask import Blueprint, request
 from flask_jwt import jwt_required
 
@@ -41,11 +41,14 @@ def lesson_list_or_create_view():
         return lesson_listing(request)
 
 
-@lessons_blueprint.route('/lesson/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@lessons_blueprint.route('/lesson/<int:lesson_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
-def lesson_detail_view(id):
+def lesson_detail_view(lesson_id):
     if request.method == 'GET':
-        return lesson_detail(request, lesson_id=id)
+        return lesson_detail(request, lesson_id=lesson_id)
+
+    if request.method == 'PUT':
+        return lesson_update(request, lesson_id=lesson_id)
 
     if request.method == 'DELETE':
-        return lesson_delete(request, lesson_id=id)
+        return lesson_delete(request, lesson_id=lesson_id)

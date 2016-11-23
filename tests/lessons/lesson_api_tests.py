@@ -119,3 +119,32 @@ class LessonAPITestCase(APITestCase):
 
         lesson_from_db = Lesson.query.get(lesson.id)
         self.assertIsNone(lesson_from_db)
+
+    def test_lesson_update(self):
+        lesson = self.lesson_factory.new_into_db()
+
+        token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
+
+        json_update = {}
+        json_update['name'] = "new_name" if lesson.name != "new_name" else "another_name"
+        json_update['teacher_ids'] = [self.user_factory.new_into_db().id for i in range(0, 3)]
+        json_update['student_ids'] = [self.user_factory.new_into_db().id for i in range(0, 3)]
+        json_update['subject_id'] = self.subject_factory.new_into_db().id
+
+        response = self.client.put(
+            '/lessons/lesson/{}'.format(lesson.id),
+            data=json.dumps(json_update),
+            headers={'Authorization': 'JWT ' + token, 'Content-Type': 'application/json'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        lesson_from_db = Lesson.query.get(lesson.id)
+        self.assertIsNotNone(lesson_from_db)
+
+        self.assertEqual(lesson_from_db.name, json_update['name'])
+        self.assertEqual(lesson_from_db.subject_id, json_update['subject_id'])
+        self.assertEqual([t.id for t in lesson_from_db.teachers], json_update['teacher_ids'])
+        self.assertEqual([s.id for s in lesson_from_db.students], json_update['student_ids'])
+
+
