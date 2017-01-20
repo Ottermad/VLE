@@ -22,7 +22,7 @@ def get_boolean_query_param(request, param_name):
     return False
 
 
-def get_record_by_id(model_id, model, custom_not_found_error=None):
+def get_record_by_id(model_id, model, custom_not_found_error=None, check_school_id=True):
     # Check user specified is in the correct school
     record = model.query.filter_by(id=model_id).first()
     if record is None:
@@ -30,7 +30,8 @@ def get_record_by_id(model_id, model, custom_not_found_error=None):
             raise custom_not_found_error
 
         raise NotFoundError()
-    if record.school_id != g.user.school_id:
-        raise UnauthorizedError()
+    if check_school_id:
+        if record.school_id != g.user.school_id:
+            raise UnauthorizedError()
 
     return record

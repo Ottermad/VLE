@@ -52,4 +52,9 @@ class QuizFactory:
 
         return quiz
 
+    def new_into_db(self, **kwargs):
+        quiz = self.new(**kwargs)
+        db.session.add(quiz)
+        db.session.commit()
+        return quiz
 

@@ -86,6 +86,12 @@ class Submission(db.Model):
         'polymorphic_on': type_id
     }
 
+    def __init__(self, homework_id, type_id, user_id, datetime_submitted):
+        self.homework_id = homework_id
+        self.type_id = type_id
+        self.user_id = user_id
+        self.datetime_submitted = datetime_submitted
+
 
 class EssaySubmission(Submission):
     id = db.Column(db.Integer, db.ForeignKey('submission.id'), primary_key=True)
@@ -96,9 +102,40 @@ class EssaySubmission(Submission):
     }
 
 
+class QuizAnswer(db.Model):
+    __table_args__ = (
+        db.UniqueConstraint("submission_id", "question_id"),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    answer = db.Column(db.String(120))
+    submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
+
+    def __init__(self, answer, submission_id, question_id):
+        self.answer = answer
+        self.submission_id = submission_id
+        self.question_id = question_id
+
+
 class QuizSubmission(Submission):
     id = db.Column(db.Integer, db.ForeignKey('submission.id'), primary_key=True)
     total_score = db.Column(db.Integer)
+
+    answers = db.relationship(QuizAnswer, backref='submission', lazy='dynamic')
+
+    def __init__(self, homework_id, user_id, datetime_submitted):
+        super().__init__(homework_id, HomeworkType.HOMEWORK.value, user_id, datetime_submitted)
+        self.total_score = 0
+
+    def mark(self):
+        score = 0
+        # TODO: Refactor to make more efficient
+        for answer in self.answers:
+            question = Question.query.get(answer.question_id)
+            if question.question_answer == answer.answer:
+                score += 1
+        self.total_score = score
+
 
 
 class Question(db.Model):
@@ -118,14 +155,3 @@ class Question(db.Model):
             'question_text': self.question_text,
             'answer': self.question_answer
         }
-
-
-class QuizAnswer(db.Model):
-    __table_args__ = (
-        db.UniqueConstraint("submission_id", "question_id"),
-    )
-    id = db.Column(db.Integer, primary_key=True)
-    answer = db.Column(db.String(120))
-    submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
-    question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
-
