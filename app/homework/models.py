@@ -61,8 +61,8 @@ class Quiz(Homework):
         'polymorphic_identity': HomeworkType.QUIZ.value,
     }
 
-    def __init__(self, lesson_id, title, description, type_id, date_due, number_of_questions):
-        super().__init__(lesson_id, title, description, type_id, date_due)
+    def __init__(self, lesson_id, title, description, date_due, number_of_questions):
+        super().__init__(lesson_id, title, description, HomeworkType.HOMEWORK.value, date_due)
         self.number_of_questions = number_of_questions
 
     def to_dict(self, date_as_string=False):
@@ -70,6 +70,17 @@ class Quiz(Homework):
         dictionary['number_of_questions'] = self.number_of_questions
         dictionary['questions'] = [q.to_dict() for q in self.questions]
         return dictionary
+
+
+class Essay(Homework):
+    id = db.Column(db.Integer, db.ForeignKey('homework.id'), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': HomeworkType.ESSAY.value
+    }
+
+    def __init__(self, lesson_id, title, description, date_due):
+        super().__init__(lesson_id, title,description, HomeworkType.ESSAY.value, date_due)
 
 
 class Submission(db.Model):
@@ -135,7 +146,6 @@ class QuizSubmission(Submission):
             if question.question_answer == answer.answer:
                 score += 1
         self.total_score = score
-
 
 
 class Question(db.Model):

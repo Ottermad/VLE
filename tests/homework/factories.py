@@ -4,7 +4,7 @@ from faker import Faker
 
 from app import db
 
-from app.homework.models import Quiz, HomeworkType, Question
+from app.homework.models import Quiz, HomeworkType, Question, Essay
 from tests.lessons.factories import LessonFactory
 
 fake = Faker()
@@ -39,7 +39,6 @@ class QuizFactory:
             lesson_id=lesson_id,
             title=fake.first_name(),
             description=fake.first_name(),
-            type_id=type_id,
             date_due=date_due(),
             number_of_questions=fake.random_int()
         )
@@ -58,3 +57,33 @@ class QuizFactory:
         db.session.commit()
         return quiz
 
+
+class EssayFactory:
+    def __init__(self, school):
+        self.school = school
+
+    def new(self, lesson_id=None):
+        id = fake.random_int()
+
+        if lesson_id is None:
+            lesson = LessonFactory(school=self.school).new_into_db()
+            lesson_id = lesson.id
+
+        type_id = HomeworkType.ESSAY.value
+        date_due = fake.date_time_this_year(after_now=True).date
+
+        essay = Essay(
+            lesson_id=lesson_id,
+            title=fake.first_name(),
+            description=fake.first_name(),
+            date_due=date_due(),
+        )
+
+        essay.id = id
+        return essay
+
+    def new_into_db(self, **kwargs):
+        essay = self.new(**kwargs)
+        db.session.add(essay)
+        db.session.commit()
+        return essay

@@ -1,3 +1,4 @@
+from app.homework.essay_functions import create_essay
 from app.homework.homework_functions import create_quiz, submit_quiz
 from app.permissions.decorators import permissions_required
 from flask import Blueprint, request, g
@@ -12,6 +13,7 @@ def index():
     return "Homework Index"
 
 
+# Quiz Routes
 @homework_blueprint.route('/quiz', methods=("POST", "GET"))
 @jwt_required()
 def quiz_get_or_create():
@@ -25,3 +27,12 @@ def quiz_get_or_create():
 @permissions_required({'Student'})
 def quiz_submit(quiz_id):
     return submit_quiz(request, quiz_id)
+
+
+# Essay Routes
+@homework_blueprint.route('/essay', methods=("POST",))
+@jwt_required()
+def essay_get_or_create():
+    if request.method == 'POST':
+        if g.user.has_permissions({'Teacher'}):
+            return create_essay(request)

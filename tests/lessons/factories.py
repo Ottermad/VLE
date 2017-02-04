@@ -34,7 +34,6 @@ class LessonFactory:
         self.school = school
 
     def new(self, subject=None, teachers=[]):
-        print(teachers)
         if subject is None:
             subject = SubjectFactory(self.school).new_into_db()
 
@@ -48,8 +47,6 @@ class LessonFactory:
             lesson.name = fake.first_name()
 
         for teacher in teachers:
-            print("adding teacher: ")
-            print(teacher.to_dict())
             lesson.teachers.append(teacher)
 
         lesson.id = id

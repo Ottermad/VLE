@@ -28,7 +28,6 @@ def create_quiz(request):
     if g.user.id not in [t.id for t in lesson.teachers]:
         raise UnauthorizedError()
 
-    type_id = HomeworkType.HOMEWORK.value
 
     # Validate date
     date_due_string = json_data['date_due']
@@ -41,7 +40,6 @@ def create_quiz(request):
         lesson_id=json_data['lesson_id'],
         title=json_data['title'],
         description=json_data['description'],
-        type_id=type_id,
         date_due=date_due,
         number_of_questions=json_data['number_of_questions']
     )
