@@ -45,3 +45,19 @@ class EssayAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, 201)
+
+    def test_essay_submit(self):
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        lesson = self.lesson_factory.new_into_db(students=[self.user])
+        essay = self.essay_factory.new_into_db(lesson_id=lesson.id)
+
+        essay_content = "Hello World This is my essay."
+
+        response = self.client.post(
+            '/homework/essay/{}'.format(essay.id),
+            data=json.dumps({'content': essay_content}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 204)

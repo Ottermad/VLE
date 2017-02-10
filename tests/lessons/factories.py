@@ -33,7 +33,7 @@ class LessonFactory:
     def __init__(self, school):
         self.school = school
 
-    def new(self, subject=None, teachers=[]):
+    def new(self, subject=None, teachers=[], students=[]):
         if subject is None:
             subject = SubjectFactory(self.school).new_into_db()
 
@@ -48,6 +48,9 @@ class LessonFactory:
 
         for teacher in teachers:
             lesson.teachers.append(teacher)
+
+        for student in students:
+            lesson.students.append(student)
 
         lesson.id = id
         return lesson

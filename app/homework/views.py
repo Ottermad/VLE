@@ -1,5 +1,5 @@
-from app.homework.essay_functions import create_essay
-from app.homework.homework_functions import create_quiz, submit_quiz
+from app.homework.essay_functions import create_essay, submit_essay
+from app.homework.quiz_functions import create_quiz, submit_quiz
 from app.permissions.decorators import permissions_required
 from flask import Blueprint, request, g
 from flask_jwt import jwt_required
@@ -36,3 +36,9 @@ def essay_get_or_create():
     if request.method == 'POST':
         if g.user.has_permissions({'Teacher'}):
             return create_essay(request)
+
+
+@homework_blueprint.route('/essay/<int:essay_id>', methods=("POST",))
+@jwt_required()
+def essay_submit(essay_id):
+    return submit_essay(request, essay_id)

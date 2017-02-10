@@ -68,6 +68,17 @@ def submit_quiz(request, quiz_id):
     if quiz.lesson.school_id != g.user.school_id:
         raise UnauthorizedError()
 
+    json_data = json_from_request(request)
+    expected_top_keys = ['answers']
+    expected_inner_keys = ['question_id', 'answer']
+
+    check_keys(expected_top_keys, json_data)
+
+    #  Validate lesson
+    lesson = get_record_by_id(quiz.lesson.id, Lesson)
+    if g.user.id not in [t.id for t in lesson.students]:
+        raise UnauthorizedError()
+
     question_ids = [question.id for question in quiz.questions]
 
     submission = QuizSubmission(
@@ -75,12 +86,6 @@ def submit_quiz(request, quiz_id):
         user_id=g.user.id,
         datetime_submitted=datetime.datetime.now()  # TODO: Deal with timezones
     )
-
-    json_data = json_from_request(request)
-    expected_top_keys = ['answers']
-    expected_inner_keys = ['question_id', 'answer']
-
-    check_keys(expected_top_keys, json_data)
 
     for answer in json_data['answers']:
         check_keys(expected_inner_keys, answer)

@@ -112,6 +112,10 @@ class EssaySubmission(Submission):
         'polymorphic_identity': HomeworkType.ESSAY.value,
     }
 
+    def __init__(self, homework_id, user_id, datetime_submitted, text):
+        super().__init__(homework_id, HomeworkType.ESSAY.value, user_id, datetime_submitted)
+        self.text = text
+
 
 class QuizAnswer(db.Model):
     __table_args__ = (

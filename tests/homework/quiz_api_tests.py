@@ -49,7 +49,7 @@ class QuizAPITestCase(APITestCase):
     def test_quiz_submit(self):
         token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
 
-        lesson = self.lesson_factory.new_into_db(teachers=[self.user])
+        lesson = self.lesson_factory.new_into_db(students=[self.user])
         quiz = self.quiz_factory.new_into_db(lesson_id=lesson.id)
 
         predicted_score = 0
