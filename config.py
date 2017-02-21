@@ -16,7 +16,7 @@ class Development(Config):
 
 class Production(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', None)
     JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=5000)
 
 class Testing(Config):

@@ -73,6 +73,10 @@ def create_app(config_name="default"):
         response.status_code = error.status_code
         return response
 
+    @app.route('/')
+    def root():
+        return app.send_static_file('index.html')
+
     from .school import school_blueprint
     app.register_blueprint(school_blueprint)
     from .permissions import permissions_blueprint
