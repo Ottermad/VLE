@@ -36,6 +36,8 @@ class Lesson(db.Model):
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
 
+    subject = db.relationship('Subject')
+
     teachers = db.relationship(
         'User', secondary=lesson_teacher,
         backref=db.backref('lesson_teacher', lazy='dynamic')
@@ -51,7 +53,7 @@ class Lesson(db.Model):
         self.subject_id = subject_id
         self.school_id = school_id
 
-    def to_dict(self, nest_teachers=False, nest_students=False):
+    def to_dict(self, nest_teachers=False, nest_students=False, nest_subject=False, nest_homework=False):
         lesson_as_dict = {
             'id': self.id,
             'name': self.name,
@@ -59,10 +61,16 @@ class Lesson(db.Model):
             'subject_id': self.subject_id
         }
 
+        if nest_subject:
+            lesson_as_dict['subject'] = self.subject.to_dict()
+
         if nest_teachers:
             lesson_as_dict['teachers'] = [t.to_dict() for t in self.teachers]
 
         if nest_students:
             lesson_as_dict['students'] = [s.to_dict() for s in self.students]
+
+        if nest_homework:
+            lesson_as_dict['homework'] = [h.to_dict(date_as_string=True) for h in self.homework]
 
         return lesson_as_dict

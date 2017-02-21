@@ -21,6 +21,7 @@ class User(db.Model):
     last_name = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.LargeBinary())
+    form_id = db.Column(db.Integer, db.ForeignKey('form.id'), nullable=True)
 
     # Permissions and Roles
     permissions = db.relationship(
@@ -84,3 +85,12 @@ class User(db.Model):
     def has_roles(self, roles):
         users_roles = {role.name for role in self.roles}
         return roles.issubset(users_roles)
+
+
+class Form(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
+
+    def __init__(self, name):
+        self.name = name

@@ -45,6 +45,10 @@ class Permission(db.Model):
             "description": "Allows a user to be a student."
         },
         {
+            "name": "Parent",
+            "description": "Allows user to be a parent."
+        },
+        {
             "name": "CRUD_USERS",
             "description": "Allows a user to create, read, update and delete users."
         },

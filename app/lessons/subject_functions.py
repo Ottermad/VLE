@@ -8,7 +8,7 @@ from app.lessons.models import Subject
 
 def create_subject(name, school_id):
     if subject_name_in_use(name, school_id):
-        raise FieldInUseError()
+        raise FieldInUseError('Name')
 
     subject = Subject(name=name, school_id=school_id)
     db.session.add(subject)

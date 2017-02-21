@@ -1,6 +1,6 @@
 from app import db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError,CustomError
-from app.helper import json_from_request, check_keys, get_record_by_id
+from app.helper import json_from_request, check_keys, get_record_by_id, get_boolean_query_param
 from app.lessons.models import Lesson, Subject
 from flask import jsonify
 from flask.globals import g
@@ -63,7 +63,11 @@ def lesson_listing(request):
 
 def lesson_detail(request, lesson_id):
     lesson = get_record_by_id(lesson_id, Lesson)
-    return jsonify({'success': True, 'lesson': lesson.to_dict()})
+    nest_teachers = get_boolean_query_param(request, 'nest-teachers')
+    nest_students = get_boolean_query_param(request, 'nest-students')
+    nest_subject = get_boolean_query_param(request, 'nest-subject')
+    nest_homework = get_boolean_query_param(request, 'nest-homework')
+    return jsonify({'success': True, 'lesson': lesson.to_dict(nest_homework=nest_homework, nest_teachers=nest_teachers, nest_students=nest_students, nest_subject=nest_subject)})
 
 
 def lesson_delete(request, lesson_id):
@@ -103,3 +107,11 @@ def lesson_update(request, lesson_id):
     db.session.commit()
 
     return jsonify({'success': True, 'message': 'Updated.'})
+
+
+def lessons_taught(request):
+    nest_teachers = get_boolean_query_param(request, 'nest-teachers')
+    nest_students = get_boolean_query_param(request, 'nest-students')
+    nest_subject = get_boolean_query_param(request, 'nest-subject')
+    lessons = [lesson.to_dict(nest_teachers=nest_teachers, nest_students=nest_students, nest_subject=nest_subject) for lesson in g.user.lessons_taught]
+    return jsonify({'success': True, 'lessons': lessons})

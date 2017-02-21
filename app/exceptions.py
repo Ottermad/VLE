@@ -14,6 +14,12 @@ class MissingKeyError(CustomError):
         super().__init__(409, message="Missing key: {}".format(key))
 
 
+class BlankValueError(CustomError):
+    """Error for when the value of a key is blank."""
+    def __init__(self, key):
+        super().__init__(409, message="Value for key: {} cannot be blank".format(key))
+
+
 class NoJSONError(CustomError):
     """Error for when no JSON is received."""
     def __init__(self):

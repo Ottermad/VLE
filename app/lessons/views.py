@@ -1,7 +1,9 @@
 from app.exceptions import UnauthorizedError
 from app.lessons.subject_functions import create_subject_view, list_subject_view, subject_detail_view, subject_delete_view, \
     subject_update_view
-from app.lessons.lesson_functions import lesson_create, lesson_listing, lesson_detail, lesson_delete, lesson_update
+from app.lessons.lesson_functions import lesson_create, lesson_listing, lesson_detail, lesson_delete, lesson_update, \
+    lessons_taught
+from app.permissions.decorators import permissions_required
 from flask import Blueprint, request
 from flask.globals import g
 from flask_jwt import jwt_required
@@ -47,6 +49,13 @@ def lesson_list_or_create_view():
         raise UnauthorizedError()
     if request.method == "GET":
         return lesson_listing(request)
+
+
+@lessons_blueprint.route('/lesson/taught')
+@jwt_required()
+@permissions_required({'Teacher'})
+def lessons_taught_view():
+    return lessons_taught(request)
 
 
 @lessons_blueprint.route('/lesson/<int:lesson_id>', methods=['GET', 'PUT', 'DELETE'])

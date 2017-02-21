@@ -15,7 +15,6 @@ def create_essay(request):
         "lesson_id",
         "title",
         "description",
-        "type",
         "date_due",
     ]
     json_data = json_from_request(request)
@@ -74,4 +73,13 @@ def submit_essay(request, essay_id):
     db.session.add(submission)
     db.session.commit()
 
-    return "", 204
+    return jsonify({'success': True}), 201
+
+
+def essay_detail(request, essay_id):
+    # Check essay if valid
+    essay = get_record_by_id(essay_id, Essay, check_school_id=False)
+    if essay.lesson.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    return jsonify({'success': True, 'essay': essay.to_dict()})

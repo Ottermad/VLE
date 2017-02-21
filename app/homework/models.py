@@ -34,6 +34,10 @@ class Homework(db.Model):
         'polymorphic_on': type_id
     }
 
+    def has_submitted(self, user_id):
+        submission = Submission.query.filter_by(user_id=user_id, homework_id=self.id).first()
+        return not (submission is None)
+
     def __init__(self, lesson_id, title, description, type_id, date_due):
         self.lesson_id = lesson_id
         self.title = title
@@ -41,14 +45,23 @@ class Homework(db.Model):
         self.type_id = type_id
         self.date_due = date_due
 
-    def to_dict(self, date_as_string=False):
-        return {
+    def to_dict(self, date_as_string=False, nest_lesson=False, has_submitted=False, user_id=None):
+        homework_dict = {
+            'id': self.id,
             'lesson_id': self.lesson_id,
             'title': self.title,
             'description': self.description,
             'type': HomeworkType(self.type_id).name,
             'date_due': self.date_due.strftime('%d/%m/%Y') if date_as_string else self.date_due
         }
+
+        if nest_lesson:
+            homework_dict['lesson'] = self.lesson.to_dict()
+
+        if has_submitted:
+            homework_dict['submitted'] = self.has_submitted(user_id)
+
+        return homework_dict
 
 
 class Quiz(Homework):
@@ -91,6 +104,8 @@ class Submission(db.Model):
     datetime_submitted = db.Column(db.DateTime)
 
     homework = db.relationship('Homework', backref=db.backref('submissions'))
+    comments = db.relationship('Comment', backref=db.backref('submission'))
+    user = db.relationship('User')
 
     __mapper_args__ = {
         'polymorphic_identity': HomeworkType.HOMEWORK.value,
@@ -102,6 +117,27 @@ class Submission(db.Model):
         self.type_id = type_id
         self.user_id = user_id
         self.datetime_submitted = datetime_submitted
+
+    def to_dict(self, nest_user=False, nest_comments=False, nest_homework=False):
+        submission_dict = {
+            'id': self.id,
+            'homework_id': self.homework_id,
+            'user_id': self.user_id,
+            'type_id': self.type_id,
+            'type': HomeworkType(self.type_id).name,
+            'datetime_submitted': self.datetime_submitted
+        }
+
+        if nest_user:
+            submission_dict['user'] = self.user.to_dict()
+
+        if nest_homework:
+            submission_dict['homework'] = self.homework.to_dict(has_submitted=True, date_as_string=True)
+
+        if nest_comments:
+            submission_dict['comments'] = [c.to_dict() for c in self.comments]
+
+        return submission_dict
 
 
 class EssaySubmission(Submission):
@@ -115,6 +151,12 @@ class EssaySubmission(Submission):
     def __init__(self, homework_id, user_id, datetime_submitted, text):
         super().__init__(homework_id, HomeworkType.ESSAY.value, user_id, datetime_submitted)
         self.text = text
+
+    def to_dict(self, **kwargs):
+        submission_dict = super().to_dict(**kwargs)
+        submission_dict['text'] = self.text
+        return submission_dict
+
 
 
 class QuizAnswer(db.Model):
@@ -168,4 +210,21 @@ class Question(db.Model):
             'homework_id': self.homework_id,
             'question_text': self.question_text,
             'answer': self.question_answer
+        }
+
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
+    text = db.Column(db.Text)
+
+    def __init__(self, submission_id, text):
+        self.submission_id = submission_id
+        self.text = text
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'submission_id': self.submission_id,
+            'text': self.text
         }

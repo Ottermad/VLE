@@ -32,7 +32,7 @@ def user_create(request):
     if User.query.filter_by(email=data['email']).first() is not None:
         raise FieldInUseError("email")
 
-    if User.query.filter_by(username=data['username'], school_id=data['school_id']).first() is not None:
+    if User.query.filter_by(username=data['username'], school_id=g.user.school_id).first() is not None:
         raise FieldInUseError("username")
 
     # Create user
@@ -51,3 +51,13 @@ def user_create(request):
     return jsonify({"success": True, "user": user.to_dict()}), 201
 
 
+def current_user_details(request):
+    nest_roles = get_boolean_query_param(request, 'nest-roles')
+    nest_role_permissions = get_boolean_query_param(request, 'nest-role-permissions')
+    nest_permissions = get_boolean_query_param(request, 'nest-permissions')
+    user_dict = g.user.to_dict(
+        nest_roles=nest_roles,
+        nest_role_permissions=nest_role_permissions,
+        nest_permissions=nest_permissions
+    )
+    return jsonify({'success': True, 'user': user_dict})

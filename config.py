@@ -1,4 +1,5 @@
 import os
+import datetime
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -10,6 +11,7 @@ class Config:
 class Development(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost/{}'.format('vle_db')
+    JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=5000)
 
 
 class Testing(Config):
