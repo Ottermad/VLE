@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 
 from flask import Flask, jsonify, current_app, g
 
@@ -103,3 +104,6 @@ def create_database():
         logging.info("Database already existed, continuing")
     finally:
         conn.close()
+
+if 'HEROKU' in os.environ:
+    app = create_app(config_name='Production')

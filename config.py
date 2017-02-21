@@ -14,6 +14,11 @@ class Development(Config):
     JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=5000)
 
 
+class Production(Config):
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=5000)
+
 class Testing(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'testing-database.sqlite')
