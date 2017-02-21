@@ -105,6 +105,8 @@ def create_database():
     finally:
         conn.close()
 
+
+print(os.environ)
+
 if 'HEROKU' in os.environ:
-    print(os.environ)
     app = create_app(config_name='Production')
