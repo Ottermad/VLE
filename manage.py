@@ -12,8 +12,12 @@ from flask_script import Manager
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError
 
+import os
 
-app = create_app()
+if 'HEROKU' in os.environ:
+    app = create_app('production')
+else:
+    app = create_app()
 
 migrate = Migrate(app, db)
 
