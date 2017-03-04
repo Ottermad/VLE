@@ -53,7 +53,11 @@ class User(db.Model):
         self.school_id = school_id
 
         # Securely hash the password using bcrypt
-        self.password = generate_password_hash(password)
+        self.password = self.generate_password_hash(password)
+
+    @classmethod
+    def generate_password_hash(self, password):
+        return generate_password_hash(password)
 
     def to_dict(self, nest_roles=False, nest_role_permissions=False, nest_permissions=False):
         """Convert instance into a dict, excluding password."""

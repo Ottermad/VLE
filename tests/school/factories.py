@@ -31,9 +31,9 @@ class SchoolFactory:
                 db.session.add(permission)
 
         # Create roles
-        if not without_roles:
-            for role in Role.default_roles(school.id):
-                db.session.add(role)
+        # if not without_roles:
+        #     for role in Role.default_roles(school.id):
+        #         db.session.add(role)
 
         db.session.commit()
         return school

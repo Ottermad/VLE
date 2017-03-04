@@ -48,14 +48,14 @@ class Permission(db.Model):
             "name": "Parent",
             "description": "Allows user to be a parent."
         },
-        {
-            "name": "CRUD_USERS",
-            "description": "Allows a user to create, read, update and delete users."
-        },
-        {
-            "name": "CRUD_PERMISSIONS",
-            "description": "Allows a user to create, read, update and delete permissions."
-        }
+        # {
+        #     "name": "CRUD_USERS",
+        #     "description": "Allows a user to create, read, update and delete users."
+        # },
+        # {
+        #     "name": "CRUD_PERMISSIONS",
+        #     "description": "Allows a user to create, read, update and delete permissions."
+        # }
     ]
 
     def __init__(self, name, school_id, description):

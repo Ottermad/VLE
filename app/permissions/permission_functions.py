@@ -2,7 +2,7 @@ from app.user.models import User
 from flask import g, jsonify
 
 from app import CustomError, db
-from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError
+from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError, MissingKeyError
 from app.helper import json_from_request, check_keys, get_record_by_id
 # from app.user.helper_functions import get_user_by_id
 
@@ -122,24 +122,30 @@ def grant_permission(request):
 def remove_permission(request):
     data = json_from_request(request)
 
-    expected_keys = ["user_id", "permission_id"]
+    expected_keys = ["user_id"]
     check_keys(expected_keys, data)
+
+    if "permission_id" not in data.keys() and "all" not in data.keys():
+        raise MissingKeyError("permission_id or all")
 
     # Check user specified is in the correct school
     user = get_record_by_id(data['user_id'], User, CustomError(409, message="Invalid user_id."))
 
-    #  Check the permission specified is in the correct school
-    permission = get_permission_by_id(data['permission_id'], CustomError(409, message="Invalid permission_id."))
+    if "all" in data.keys() and data['all'] is True:
+        user.permissions = []
+    else:
+        #  Check the permission specified is in the correct school
+        permission = get_permission_by_id(data['permission_id'], CustomError(409, message="Invalid permission_id."))
 
-    #  Check the user has the role
-    if permission.id not in [p.id for p in user.permissions]:
-        raise CustomError(
-            409,
-            message="User with id: {} does not have permission with id: {}".format(data['user_id'],
-                                                                                   data['permission_id'])
-        )
+        #  Check the user has the permission
+        if permission.id not in [p.id for p in user.permissions]:
+            raise CustomError(
+                409,
+                message="User with id: {} does not have permission with id: {}".format(data['user_id'],
+                                                                                       data['permission_id'])
+            )
 
-    user.permissions.remove(permission)
+        user.permissions.remove(permission)
 
     db.session.add(user)
     db.session.commit()
