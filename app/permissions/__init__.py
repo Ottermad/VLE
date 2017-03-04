@@ -50,7 +50,7 @@ def permission_detail_view(permission_id):
 @permissions_blueprint.route('/permission/grant', methods=["POST", "DELETE"])
 @jwt_required()
 @permissions_required({'Administrator'})
-def grant__or_remove_permission_view():
+def grant_or_remove_permission_view():
     """Grant a permission to a user."""
     if request.method == "POST":
         return grant_permission(request)
