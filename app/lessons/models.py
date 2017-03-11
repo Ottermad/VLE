@@ -2,14 +2,14 @@ from app import db
 
 lesson_teacher = db.Table(
     'lesson_teacher',
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
 
 lesson_student = db.Table(
     'lesson_student',
-    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
 
 
@@ -31,6 +31,7 @@ class Subject(db.Model):
 
 
 class Lesson(db.Model):
+    __mapper_args__ = {'confirm_deleted_rows': False}
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'))

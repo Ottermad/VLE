@@ -36,12 +36,14 @@ class User(db.Model):
     # Lessons
     lessons_taught = db.relationship(
         'Lesson', secondary=lesson_teacher,
-        backref=db.backref('lesson_teacher', lazy='dynamic')
+        passive_deletes=True,
+        # backref=db.backref('lesson_teacher', lazy='dynamic')
     )
 
     lessons_attending = db.relationship(
         'Lesson', secondary=lesson_student,
-        backref=db.backref('lesson_student', lazy='dynamic')
+        passive_deletes=True,
+        # backref=db.backref('lesson_student', lazy='dynamic')
     )
 
     def __init__(self, username, first_name, last_name, email, password, school_id):

@@ -3,7 +3,7 @@ from flask import g, jsonify
 from app import db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError
 from app.helper import json_from_request, check_keys, get_record_by_id
-from app.lessons.models import Subject
+from app.lessons.models import Subject, Lesson
 
 
 def create_subject(name, school_id):
@@ -51,6 +51,10 @@ def subject_detail_view(request, subject_id):
 
 def subject_delete_view(request, subject_id):
     subject = get_record_by_id(subject_id, Subject)
+    # Check if subject still has lessons
+    lesson = Lesson.query.filter_by(subject_id=subject.id).first()
+    if lesson is not None:
+        return jsonify({'error': True, 'message': 'Please delete all lessons which are part of this subject'}), 409
     db.session.delete(subject)
     db.session.commit()
     return jsonify({'success': True, 'message': 'Deleted.'})

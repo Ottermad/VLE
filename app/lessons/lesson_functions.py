@@ -1,7 +1,7 @@
 from app import db
 from app.exceptions import FieldInUseError, NotFoundError, UnauthorizedError,CustomError
 from app.helper import json_from_request, check_keys, get_record_by_id, get_boolean_query_param
-from app.lessons.models import Lesson, Subject
+from app.lessons.models import Lesson, Subject, lesson_teacher, lesson_student
 from flask import jsonify
 from flask.globals import g
 from .helper_functions import add_students, add_teachers
@@ -72,6 +72,12 @@ def lesson_detail(request, lesson_id):
 
 def lesson_delete(request, lesson_id):
     lesson = get_record_by_id(lesson_id, Lesson)
+    # # lessons = db.session.query(lesson_teacher).filter(lesson_teacher.c.lesson_id==lesson.id).all()
+    # lessons = db.session.query(lesson_student).filter(lesson_student.c.lesson_id == lesson.id).all()
+    # print(lessons)
+    # # lesson = Lesson.query.filter_by(id=lesson_id)
+    # l = db.session.query(Lesson).filter(Lesson.id == lesson_id).first()
+    # print(l)
     db.session.delete(lesson)
     db.session.commit()
 
