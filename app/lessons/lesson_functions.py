@@ -90,8 +90,9 @@ def lesson_update(request, lesson_id):
     json_data = json_from_request(request)
 
     if "name" in json_data.keys():
-        validate_lesson_name(name=json_data['name'], school_id=g.user.school_id)
-        lesson.name = json_data['name']
+        if json_data['name'] != lesson.name:
+            validate_lesson_name(name=json_data['name'], school_id=g.user.school_id)
+            lesson.name = json_data['name']
 
     if "subject_id" in json_data.keys():
         subject = get_record_by_id(
