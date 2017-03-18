@@ -107,8 +107,10 @@ def essay_submit(essay_id):
 
 @homework_blueprint.route('/essay/submission/<int:submission_id>')
 @jwt_required()
-@permissions_required({"Teacher"})
 def view_essay_submission(submission_id):
+    if not (g.user.has_permissions({'Teacher'}) or g.user.has_permissions({'Student'})):
+        raise UnauthorizedError()
+
     submission = get_record_by_id(submission_id, EssaySubmission, check_school_id=False)
     if submission.homework.lesson.school_id != g.user.school_id:
         raise UnauthorizedError()
