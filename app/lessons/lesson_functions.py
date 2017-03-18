@@ -56,8 +56,15 @@ def validate_lesson_name(name, school_id):
 
 
 def lesson_listing(request):
-    # Get all lessons from school
-    lessons = Lesson.query.filter_by(school_id=g.user.school_id)
+    query = Lesson.query.filter_by(school_id=g.user.school_id)
+
+    # Filter by subject
+    subjects = request.args.get("subject")
+    if subjects is not None:
+        subjects = subjects.split(",")
+        query.filter(Lesson.subject_id.in_(subjects))
+
+    lessons = query.all()
     return jsonify({'success': True, 'lessons': [lesson.to_dict() for lesson in lessons]})
 
 

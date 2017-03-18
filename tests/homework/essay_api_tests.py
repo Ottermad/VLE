@@ -34,7 +34,6 @@ class EssayAPITestCase(APITestCase):
         token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
 
         lesson = self.lesson_factory.new_into_db(teachers=[self.user])
-        import ipdb; ipdb.set_trace()
         essay = self.essay_factory.new(lesson.id)
 
         essay_json = essay.to_dict(date_as_string=True)
@@ -61,4 +60,4 @@ class EssayAPITestCase(APITestCase):
             headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
         )
 
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 201)

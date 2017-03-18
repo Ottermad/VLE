@@ -86,6 +86,29 @@ class LessonAPITestCase(APITestCase):
         for lesson in lessons:
             self.assertIn(lesson.to_dict(), json_response['lessons'])
 
+    def test_lesson_listing_with_subject(self):
+        subject1 = self.subject_factory.new_into_db()
+        subject2 = self.subject_factory.new_into_db()
+
+        lesson1 = self.lesson_factory.new_into_db(subject=subject1)
+        lesson2 = self.lesson_factory.new_into_db(subject=subject2)
+
+        token = self.get_auth_token(username=self.user.username, password=self.user.raw_password)
+
+        response = self.client.get(
+            '/lessons/lesson?subject={}'.format(subject1.id),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        json_response = json.loads(response.data.decode('utf-8'))
+
+        self.assertIn('lessons', json_response.keys())
+
+        self.assertIn(lesson1.to_dict(), json_response['lessons'])
+        self.assertNotIn(lesson2.to_dict(), json_response['lessons'])
+
     def test_lesson_detail(self):
         lesson = self.lesson_factory.new_into_db()
 

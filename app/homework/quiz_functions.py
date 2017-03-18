@@ -15,9 +15,7 @@ def create_quiz(request):
         "lesson_id",
         "title",
         "description",
-        "type",
         "date_due",
-        "number_of_questions",
         "questions"
     ]
     json_data = json_from_request(request)
@@ -41,7 +39,7 @@ def create_quiz(request):
         title=json_data['title'],
         description=json_data['description'],
         date_due=date_due,
-        number_of_questions=json_data['number_of_questions']
+        number_of_questions=len(json_data['questions'])
     )
 
     db.session.add(quiz)
@@ -100,3 +98,12 @@ def submit_quiz(request, quiz_id):
     db.session.add(submission)
     db.session.commit()
     return jsonify({'score': submission.total_score})
+
+
+def quiz_detail(request, quiz_id):
+    # Check essay if valid
+    quiz = get_record_by_id(quiz_id, Quiz, check_school_id=False)
+    if quiz.lesson.school_id != g.user.school_id:
+        raise UnauthorizedError()
+
+    return jsonify({'success': True, 'quiz': quiz.to_dict()})
