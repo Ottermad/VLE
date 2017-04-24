@@ -27,7 +27,6 @@ def user_create(request):
 
     # Validate data
     expected_keys = ["first_name", "last_name", "password", "username", "email"]
-    check_keys(expected_keys, data)
 
     if User.query.filter_by(email=data['email']).first() is not None:
         raise FieldInUseError("email")

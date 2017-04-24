@@ -70,7 +70,7 @@ def subject_update_view(request, subject_id):
     # If name in data, then update the name
     if 'name' in data.keys():
         if subject_name_in_use(data['name'], school_id=subject.school_id):
-            raise FieldInUseError()
+            raise FieldInUseError("name")
         subject.name = data['name']
 
     db.session.add(subject)

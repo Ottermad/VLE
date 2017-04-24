@@ -31,6 +31,7 @@ class Permission(db.Model):
     name = db.Column(db.String(120))
     description = db.Column(db.String(240))
 
+    # Provides the default permissions to create
     DEFAULTS = [
         {
             "name": "Administrator",

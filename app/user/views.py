@@ -1,4 +1,5 @@
 from app.permissions import permissions_required
+from app.user.form_functions import create_form, list_forms, edit_form, delete_form, form_detail
 from app.user.user_functions import user_listing, user_create, current_user_details, user_update, user_detail, \
     user_delete
 from flask import Blueprint, request
@@ -41,3 +42,26 @@ def user_update_or_delete(user_id):
 @jwt_required()
 def current_user_detail_view():
     return current_user_details(request)
+
+
+@user_blueprint.route("/form", methods=("POST", "GET"))
+@jwt_required()
+@permissions_required({'Administrator'})
+def form_listing_or_create():
+    if request.method == "POST":
+        return create_form(request)
+    return list_forms(request)
+
+
+@user_blueprint.route("/form/<int:form_id>", methods=("GET", "PUT", "DELETE"))
+@jwt_required()
+@permissions_required({"Administrator"})
+def form_detail_update_delete(form_id):
+    if request.method == "GET":
+        return form_detail(request, form_id)
+
+    if request.method == "PUT":
+        return edit_form(request, form_id)
+
+    if request.method == "DELETE":
+        return delete_form(request, form_id)

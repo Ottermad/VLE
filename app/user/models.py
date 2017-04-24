@@ -98,5 +98,13 @@ class Form(db.Model):
     name = db.Column(db.String(120))
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
 
-    def __init__(self, name):
+    def __init__(self, name, school_id):
         self.name = name
+        self.school_id = school_id
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'school_id': self.school_id
+        }

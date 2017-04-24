@@ -11,12 +11,16 @@ from app.lessons.models import Lesson
 
 
 def create_essay(request):
+    """Function to create an essay from request."""
+    # List of keys needed to create an Essay
     top_level_expected_keys = [
         "lesson_id",
         "title",
         "description",
         "date_due",
     ]
+
+    # Extract JSON from request and check keys are present
     json_data = json_from_request(request)
     check_keys(top_level_expected_keys, json_data)
 
@@ -33,6 +37,7 @@ def create_essay(request):
     except ValueError:
         raise CustomError(409, message="Invalid date_due: {}.".format(json_data['date_due']))
 
+    # Create Essay
     essay = Essay(
         lesson_id=json_data['lesson_id'],
         title=json_data['title'],
