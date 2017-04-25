@@ -23,6 +23,8 @@ class User(db.Model):
     password = db.Column(db.LargeBinary())
     form_id = db.Column(db.Integer, db.ForeignKey('form.id'), nullable=True)
 
+    form = db.relationship('Form', backref=db.backref('form', lazy='dynamic'))
+
     # Permissions and Roles
     permissions = db.relationship(
         'Permission', secondary=user_permissions,
@@ -61,7 +63,7 @@ class User(db.Model):
     def generate_password_hash(self, password):
         return generate_password_hash(password)
 
-    def to_dict(self, nest_roles=False, nest_role_permissions=False, nest_permissions=False):
+    def to_dict(self, nest_roles=False, nest_role_permissions=False, nest_permissions=False, nest_form=False):
         """Convert instance into a dict, excluding password."""
         user_dictionary = {
             'id': self.id,
@@ -69,13 +71,17 @@ class User(db.Model):
             'last_name': self.last_name,
             'email': self.email,
             'username': self.username,
-            'school_id': self.school_id
+            'school_id': self.school_id,
+            'form_id': self.form_id
         }
         if nest_roles:
             user_dictionary['roles'] = [r.to_dict(nest_permissions=nest_role_permissions) for r in self.roles]
 
         if nest_permissions:
             user_dictionary['permissions'] = [p.to_dict() for p in self.permissions]
+
+        if nest_form and self.form is not None:
+            user_dictionary['form'] = self.form.to_dict()
 
         return user_dictionary
 
