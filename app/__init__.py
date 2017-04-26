@@ -41,22 +41,24 @@ def authenticate(username, password):
 
 @jwt.identity_handler
 def identity(payload):
+    # Takes identity from JWT token and gets a user from it
     from .user.models import User
     user_id = payload['identity']
     user = User.query.get(user_id)
     if user is None:
         raise CustomError(404, 'User with id: {} was not found.'.format(id))
-    g.user = user
+    g.user = user # Store user in g object which can be accessed globally for duration of request
     return user.to_dict()
 
 
 @jwt.jwt_payload_handler
 def payload_handler(identity):
+    # Returns JSON for a request for a token
     iat = datetime.datetime.utcnow()
-    exp = iat + current_app.config.get('JWT_EXPIRATION_DELTA')
-    nbf = iat + current_app.config.get('JWT_NOT_BEFORE_DELTA')
-    new_identity = identity['id']
-    return {'exp': exp, 'iat': iat, 'nbf': nbf, 'identity': new_identity}
+    exp = iat + current_app.config.get('JWT_EXPIRATION_DELTA') # Set expiry time
+    nbf = iat + current_app.config.get('JWT_NOT_BEFORE_DELTA') # Set time before token can be used
+    new_identity = identity['id'] # Identity is set to the user id
+    return {'exp': exp, 'iat': iat, 'nbf': nbf, 'identity': new_identity} # Return dictionary 
 
 
 def create_app(config_name="default"):
@@ -65,7 +67,7 @@ def create_app(config_name="default"):
 
     db.init_app(app)
 
-    jwt.init_app(app)
+    jwt.init_app(app) # Initialise JWT for app
 
     @app.errorhandler(CustomError)
     def custom_error(error):
@@ -83,13 +85,7 @@ def create_app(config_name="default"):
     app.register_blueprint(permissions_blueprint)
     from app.user.views import user_blueprint
     app.register_blueprint(user_blueprint)
-    from app.lessons.views import lessons_blueprint
-    app.register_blueprint(lessons_blueprint)
-    from app.homework.views import homework_blueprint
-    app.register_blueprint(homework_blueprint)
-    from app.timetable.views import timetable_blueprint
-    app.register_blueprint(timetable_blueprint)
-
+   
     return app
 
 

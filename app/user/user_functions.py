@@ -1,6 +1,6 @@
 from app import db
 from app.exceptions import FieldInUseError, CustomError
-from app.helper import get_boolean_query_param, json_from_request, check_keys, get_record_by_id
+from app.helper import get_boolean_query_param, json_from_request, check_keys, get_record_by_id, check_values_not_blank
 from app.user.models import Form
 from flask import jsonify, g
 from .models import User
@@ -30,6 +30,8 @@ def user_create(request):
 
     # Validate data
     expected_keys = ["first_name", "last_name", "password", "username", "email"]
+    check_keys(expected_keys, data)
+    check_values_not_blank(expected_keys, data)
 
     if User.query.filter_by(email=data['email']).first() is not None:
         raise FieldInUseError("email")
@@ -63,13 +65,32 @@ def user_update(request, user_id):
     user = get_record_by_id(user_id, User)
 
     possible_keys = ["first_name", "last_name", "password", "username", "email", "form_id"]
+    check_values_not_blank(data.keys(), data)
 
-    for key in possible_keys:
-        if key in data.keys():
-            if key == 'password':
-                user.__setattr__(key, User.generate_password_hash(data[key]))
-            else:
-                user.__setattr__(key, data[key])
+    if "first_name" in data.keys():
+        user.first_name = data['first_name']
+
+    if "last_name" in data.keys():
+        user.first_name = data['first_name']
+
+    if "password" in data.keys():
+        user.password = user.generate_password_hash(data['password'])
+
+    if "email" in data.keys():
+        if User.query.filter_by(email=data['email']).first() is not None:
+            raise FieldInUseError("email")
+        user.email = data['email']
+
+    if "username" in data.keys():
+        if User.query.filter_by(username=data['username'], school_id=g.user.school_id).first() is not None:
+            raise FieldInUseError("username")
+        user.username = data['username']
+
+    if "form_id" in data.keys():
+        # Validate form id
+        form = get_record_by_id(data["form_id"], Form,
+                                custom_not_found_error=CustomError(409, message="Invalid form_id."))
+        user.form_id = form.id
 
     db.session.add(user)
     db.session.commit()

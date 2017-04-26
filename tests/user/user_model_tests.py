@@ -5,7 +5,7 @@ from app import db, create_app
 from tests.school.factories import SchoolFactory
 
 from app.user.models import User
-from .factories import UserFactory
+from tests.user.factories import UserFactory
 
 user_factory = UserFactory()
 school_factory = SchoolFactory()
@@ -26,12 +26,12 @@ class UserModelTestCase(unittest.TestCase):
         self.app_context.pop()
 
 
-    def test_creation(self):
-        """Test users can be added to the database correctly."""
-        user = user_factory.new()
-
-        db.session.add(user)
-        db.session.commit()
-
-        user_from_db = User.query.filter_by(username=user.username).first()
-        self.assertIsNotNone(user_from_db)
+    # def test_creation(self):
+    #     """Test users can be added to the database correctly."""
+    #     user = user_factory.new()
+    #
+    #     db.session.add(user)
+    #     db.session.commit()
+    #
+    #     user_from_db = User.query.filter_by(username=user.username).first()
+    #     self.assertIsNotNone(user_from_db)

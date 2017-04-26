@@ -10,6 +10,7 @@ from app.user.models import User
 
 
 def create_school(request):
+    # This may not longer be needed and should be removed
     data = json_from_request(request)
 
     expected_keys = ["name"]
@@ -27,21 +28,31 @@ def create_school(request):
 
 
 def signup_school(request):
+    # Fetch JSON data from request
     data = json_from_request(request)
 
+    # List of keys we expect to see in JSON
     expected_keys = ["school_name", "first_name", "last_name", "password", "username", "email"]
+
+    # Checks keys are present in JSON and throws error if not which is automatically caught and converted into a error message
     check_keys(expected_keys, data)
+
+    # Checks values for keys are not blank
     check_values_not_blank(expected_keys, data)
 
+    # Create school object with user's data
     school = School(school_name=data['school_name'])
 
+    # Add school to db
     db.session.add(school)
     db.session.commit()
 
     # Create user
+    # Check email not already in use
     if User.query.filter_by(email=data['email']).first() is not None:
         raise FieldInUseError("email")
 
+    # Check username is not already in use
     if User.query.filter_by(username=data['username']).first() is not None:
         raise FieldInUseError("username")
 
@@ -55,6 +66,7 @@ def signup_school(request):
         school_id=school.id
     )
 
+    # Add user to db
     db.session.add(user)
     db.session.commit()
 
@@ -69,4 +81,5 @@ def signup_school(request):
     db.session.add(user)
     db.session.commit()
 
+    # Return success message as JSON
     return jsonify({'success': True})

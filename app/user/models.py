@@ -48,13 +48,14 @@ class User(db.Model):
         # backref=db.backref('lesson_student', lazy='dynamic')
     )
 
-    def __init__(self, username, first_name, last_name, email, password, school_id):
+    def __init__(self, username, first_name, last_name, email, password, school_id, form_id=None):
         """Create a User object but not save it to the database."""
         self.username = username
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.school_id = school_id
+        self.form_id = form_id
 
         # Securely hash the password using bcrypt
         self.password = self.generate_password_hash(password)

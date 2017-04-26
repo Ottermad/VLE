@@ -40,6 +40,7 @@ def get_record_by_id(model_id, model, custom_not_found_error=None, check_school_
 
 def check_values_not_blank(keys, data):
     for key in keys:
-        value = data[key].strip()
-        if value is None or value == '':
-            raise BlankValueError(key)
+        if isinstance(data[key], str):
+            value = data[key].strip()
+            if value is None or value == '':
+                raise BlankValueError(key)
