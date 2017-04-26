@@ -1,11 +1,13 @@
-import random
+import datetime
 
 from faker import Faker
 
 from app import db
 
-from app.homework.models import Quiz, HomeworkType, Question, Essay
+from app.homework.models import Quiz, HomeworkType, Question, Essay, QuizAnswer, QuizSubmission, EssaySubmission, \
+    Comment
 from tests.lessons.factories import LessonFactory
+from tests.user.factories import UserFactory
 
 fake = Faker()
 
@@ -58,6 +60,38 @@ class QuizFactory:
         return quiz
 
 
+class QuizSubmissionFactory:
+    def __init__(self, school):
+        self.school = school
+
+    def new(self, quiz=None, user_id=None):
+        if user_id is None:
+            user = UserFactory(school=self.school).new_into_db(permissions=['Student'])
+            user_id = user.id
+
+        if quiz is None:
+            quiz = QuizFactory(school=self.school).new_into_db()
+
+        submission = QuizSubmission(
+            homework_id=quiz.id,
+            user_id=user_id,
+            datetime_submitted=datetime.datetime.now()
+        )
+
+        submission.id = fake.random_int()
+
+        for question in quiz.questions:
+            answer = QuizAnswer(fake.first_name(), submission.id, question.id)
+            submission.answers.append(answer)
+        return submission
+
+    def new_into_db(self, **kwargs):
+        quiz_submission = self.new(**kwargs)
+        db.session.add(quiz_submission)
+        db.session.commit()
+        return quiz_submission
+
+
 class EssayFactory:
     def __init__(self, school):
         self.school = school
@@ -87,3 +121,62 @@ class EssayFactory:
         db.session.add(essay)
         db.session.commit()
         return essay
+
+
+class EssaySubmissionFactory:
+    def __init__(self, school):
+        self.school = school
+
+    def new(self, essay=None, user_id=None):
+        if essay is None:
+            essay = EssayFactory(school=self.school).new_into_db()
+
+        if user_id is None:
+            user = UserFactory(school=self.school).new_into_db(permissions=['Student'])
+            user_id = user.id
+
+        submission = EssaySubmission(
+            homework_id=essay.id,
+            user_id=user_id,
+            datetime_submitted=datetime.datetime.now(),
+            text=fake.first_name()
+        )
+
+        submission.id = fake.random_int()
+
+        return submission
+
+    def new_into_db(self, **kwargs):
+        essay_submission = self.new(**kwargs)
+        db.session.add(essay_submission)
+        db.session.commit()
+        return essay_submission
+
+
+class CommentFactory:
+    def __init__(self, school):
+        self.school = school
+
+    def new(self, submission_id=None, user_id=None):
+        if submission_id is None:
+            submission = EssaySubmissionFactory(school=self.school).new_into_db()
+            submission_id = submission.id
+
+        if user_id is None:
+            user = UserFactory(school=self.school).new_into_db(permissions=['Teacher'])
+            user_id = user.id
+
+        comment = Comment(
+            text=fake.first_name(),
+            user_id=user_id,
+            submission_id=submission_id
+        )
+
+        comment.id = fake.random_int()
+        return comment
+
+    def new_into_db(self, **kwargs):
+        comment = self.new(**kwargs)
+        db.session.add(comment)
+        db.session.commit()
+        return comment

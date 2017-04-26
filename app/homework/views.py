@@ -40,7 +40,7 @@ def list_submissions(homework_id):
 @homework_blueprint.route('/due/<int:lesson_id>')
 @jwt_required()
 def homework_due_for_lesson(lesson_id):
-    homework = Homework.query.filter_by(Homework.lesson_id == lesson_id)
+    homework = Homework.query.filter(Homework.lesson_id == lesson_id)
     return jsonify({'success': True, 'homework': [h.to_dict(date_as_string=True) for h in homework]})
 
 

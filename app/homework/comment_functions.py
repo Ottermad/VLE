@@ -36,13 +36,17 @@ def comment_create_view(request):
 
 def comment_detail_view(request, comment_id):
     """Fetch Comment based on id from request."""
-    comment = get_record_by_id(comment_id, Comment)
+    comment = get_record_by_id(comment_id, Comment, check_school_id=False)
+    if comment.user.school_id != g.user.school_id:
+        raise UnauthorizedError()
     return jsonify({'success': True, 'comment': comment.to_dict(nest_user=True)})
 
 
 def comment_delete_view(request, comment_id):
     """Delete Comment based on id."""
-    comment = get_record_by_id(comment_id, Comment)
+    comment = get_record_by_id(comment_id, Comment, check_school_id=False)
+    if comment.user.school_id != g.user.school_id:
+        raise UnauthorizedError()
     db.session.delete(comment)
     db.session.commit()
     return jsonify({'success': True, 'message': 'Deleted.'})

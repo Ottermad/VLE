@@ -4,7 +4,7 @@ from tests import APITestCase
 from tests.school.factories import SchoolFactory
 from tests.user.factories import UserFactory
 from tests.lessons.factories import SubjectFactory, LessonFactory
-from tests.homework.factories import QuizFactory, EssayFactory
+from tests.homework.factories import QuizFactory, EssayFactory, EssaySubmissionFactory
 
 from app.user.models import User
 from app.permissions.models import Permission, Role
@@ -26,6 +26,7 @@ class EssayAPITestCase(APITestCase):
         self.subject_factory = SubjectFactory(self.school)
         self.lesson_factory = LessonFactory(self.school)
         self.essay_factory = EssayFactory(self.school)
+        self.essay_submission_factory = EssaySubmissionFactory(self.school)
 
     def tearDown(self):
         super(EssayAPITestCase, self).tearDown()
@@ -61,3 +62,36 @@ class EssayAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, 201)
+
+    def test_essay_detail(self):
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        lesson = self.lesson_factory.new_into_db(students=[self.user])
+        essay = self.essay_factory.new_into_db(lesson_id=lesson.id)
+
+
+        response = self.client.get(
+            '/homework/essay/{}'.format(essay.id),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.data.decode('utf-8'))
+        self.assertIn('essay', json_response.keys())
+        self.assertEqual(essay.id, json_response['essay']['id'])
+
+    def test_view_essay_submission(self):
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        essay = self.essay_factory.new_into_db()
+        submission = self.essay_submission_factory.new_into_db()
+
+        response = self.client.get(
+            '/homework/essay/submission/{}'.format(submission.id),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.data.decode('utf-8'))
+        self.assertIn('submission', json_response.keys())
+        self.assertEqual(submission.id, json_response['submission']['id'])
