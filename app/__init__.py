@@ -85,6 +85,12 @@ def create_app(config_name="default"):
     app.register_blueprint(permissions_blueprint)
     from app.user.views import user_blueprint
     app.register_blueprint(user_blueprint)
+    from app.lessons.views import lessons_blueprint
+    app.register_blueprint(lessons_blueprint)
+    from app.homework.views import homework_blueprint
+    app.register_blueprint(homework_blueprint)
+    from app.timetable.views import timetable_blueprint
+    app.register_blueprint(timetable_blueprint)
    
     return app
 

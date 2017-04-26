@@ -60,9 +60,10 @@ def lesson_listing(request):
 
     # Filter by subject
     subjects = request.args.get("subject")
+
     if subjects is not None:
         subjects = subjects.split(",")
-        query.filter(Lesson.subject_id.in_(subjects))
+        query = query.filter(Lesson.subject_id.in_(subjects))
 
     lessons = query.all()
     return jsonify({'success': True, 'lessons': [lesson.to_dict() for lesson in lessons]})

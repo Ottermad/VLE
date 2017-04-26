@@ -5,7 +5,7 @@ from faker import Faker
 from tests import APITestCase
 from tests.school.factories import SchoolFactory
 from tests.user.factories import UserFactory
-from .factories import SubjectFactory
+from tests.lessons.factories import SubjectFactory
 
 from app.lessons.models import Subject
 
@@ -127,6 +127,23 @@ class SubjectAPITestCase(APITestCase):
         subject = Subject.query.get(subject.id)
         self.assertEqual(subject.name, new_name)
 
+    def test_update_subject_failed_bad_id(self):
+        # Create subject
+        subject = self.subject_factory.new_into_db()
+
+        # Send request
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.put(
+            '/lessons/subject/{}'.format(-1),
+            data=json.dumps({}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        # Check status code
+        self.assertEqual(response.status_code, 404)
+
+
     def test_delete_subject(self):
         # Create subject
         subject = self.subject_factory.new_into_db()
@@ -150,3 +167,35 @@ class SubjectAPITestCase(APITestCase):
         # Check subject is no longer in database
         subject_from_db = Subject.query.get(subject.id)
         self.assertIsNone(subject_from_db)
+
+    def test_read_subject_failed_bad_id(self):
+        # Create subject
+        subject = self.subject_factory.new_into_db()
+
+        # Send request
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.get(
+            '/subjects/subject/{}'.format(-1),
+            data=json.dumps({}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        # Check status code
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_subject_failed_bad_id(self):
+        # Create subject
+        subject = self.subject_factory.new_into_db()
+
+        # Send request
+        token = self.get_auth_token(self.user.username, self.user.raw_password)
+
+        response = self.client.delete(
+            '/subjects/subject/{}'.format(-1),
+            data=json.dumps({}),
+            headers={'Content-Type': 'application/json', 'Authorization': 'JWT ' + token}
+        )
+
+        # Check status code
+        self.assertEqual(response.status_code, 404)
