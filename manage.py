@@ -51,5 +51,14 @@ def run():
     # call(["python", "manage.py", "db", "upgrade"])
     app.run(host="0.0.0.0", port=8000, debug=True)
 
+@manager.command
+def create_hw_types():
+    from app.homework.models import Type, HomeworkType
+    for hw_type in HomeworkType:
+        t = Type(hw_type.name)
+        t.id = hw_type.value
+        db.session.add(t)
+    db.session.commit()
+
 if __name__ == "__main__":
     manager.run()
